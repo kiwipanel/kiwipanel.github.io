@@ -1,4 +1,6 @@
-## `kiwipanel check` — Full System Audit & Health Report
+# Security
+
+## Full System Audit & Health Report
 
 The `kiwipanel check` command is one of the **core safety features** of KiwiPanel.  
 It performs a deep, structured inspection of the server and reports the current

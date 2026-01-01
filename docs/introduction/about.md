@@ -5,6 +5,7 @@
 ⚠️ **WARNING: PRE-ALPHA RELEASE — DO NOT DEPLOY TO PRODUCTION**
 
 KiwiPanel is a lightweight, open-source server control panel focused on **simplicity, transparency, and sane defaults**.  
+
 It is designed to help you manage a **LOMP stack** (Linux, OpenLiteSpeed, MariaDB, PHP) without bloat or lock-in.
 
 ## Built for Developers & VPS Users

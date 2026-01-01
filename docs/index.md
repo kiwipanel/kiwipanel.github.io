@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: "KiwiPanel"
-  tagline: An OpenLiteSpeed panel for WordPress
+  tagline: A lightweight LOMP stack panel
   actions:
     - theme: brand
       text: Introduction
@@ -45,3 +45,7 @@ features:
       Uses standard Linux config files and services, so you
       always know what is happening on your server.
 ---
+####
+<center>
+    Last update: 1 Jan 2026
+</center>

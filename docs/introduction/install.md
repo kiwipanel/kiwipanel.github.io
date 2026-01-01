@@ -1,13 +1,13 @@
-### KiwiPanel Installation
+# Installation
 
-### Prerequisites
+## Prerequisites
 
 - Fresh VPS with supported OSs.
-- Minimum 512MB RAM
-- Minimum 5GB disk space
+- Minimum >=512MB RAM
+- Minimum >=1GB disk space
 - Root access
 
-### Install
+## Install
 
 **Quick install (advanced users):**
 ```bash

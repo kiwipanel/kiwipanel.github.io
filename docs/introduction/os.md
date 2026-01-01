@@ -1,4 +1,6 @@
-### Supported Operating Systems
+# Supported Operating Systems
+
+## Linux Distributions
 
 KiwiPanel supports non-EOL Linux distributions officially supported by OpenLiteSpeed.
 
@@ -9,3 +11,5 @@ KiwiPanel supports non-EOL Linux distributions officially supported by OpenLiteS
 - RHEL 8, 9 and compatible derivatives
 
 CentOS Stream and EOL distributions are not supported.
+
+## Windows and Mac Distributions: Not Supported
