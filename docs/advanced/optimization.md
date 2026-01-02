@@ -1,3 +1,7 @@
+# Optimization
+
+You might leverage the power of optimization techniques to enhance your system's performance and efficiency.
+
 ## sysctl.conf Generator
 
 The **sysctl.conf Generator** is an online tool that helps you create optimized Linux kernel parameter configurations tailored to your server’s hardware and workload.  

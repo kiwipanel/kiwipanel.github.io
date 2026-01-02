@@ -1,4 +1,4 @@
-## Look Mode (Hide / Show Web Interface)
+# Look Mode (Hide / Show Web Interface)
 
 **Look Mode** is a simple toggle mechanism that lets you **hide or show** the KiwiPanel web interface using CLI commands.  
 

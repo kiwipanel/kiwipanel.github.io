@@ -31,10 +31,14 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Firewall", link: "/features/firewall" },
-          { text: "Optimization", link: "/features/optimization" },
           { text: "Lock Mode", link: "/features/lockmode" },
           { text: "Security Check", link: "/features/security" },
         ],
+      },
+      {
+        text: "Advanced",
+        collapsed: false,
+        items: [{ text: "Optimization", link: "/advanced/optimization" }],
       },
       {
         text: "Roadmaps",
