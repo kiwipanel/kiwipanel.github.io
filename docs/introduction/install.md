@@ -51,6 +51,24 @@ Then you will see a "warning" from the browser. That is expected because we are 
 
 ![An image](/static/ssl_click.png)
 
+This is the warning on **Firefox**. You can ignore it and proceed to the panel by clicking on "Advanced..." button and then on "Accept the Risk and Continue".
+
+![An image](/static/ssl_warning_firefox.png)
+
+### Caveat:
+
+-❌ Accessing to  https://YOUR_SERVER_IP, you get refusal because there is not self-sign certificate for the IP.
+
+-✅ You should use http://YOUR_SERVER_IP.
+
+-❌ Accessing to http://YOUR_SERVER_IP:8443 is not recommended because it is not secure. You will see a "warning" from the browser or might be a blank depending on the browser. 
+
+![An image](/static/https.png)
+
+-❌ Accessing to  https://YOUR_SERVER_IP:8443, you get 404 Not Found. It means the webpanel is properly configured. That is expected by design.
+
+-✅ You should use https://YOUR_SERVER_IP:8443/PASSCODE instead.
+
 ### Firewall
 
 - Port `8443` is used for the admin panel
