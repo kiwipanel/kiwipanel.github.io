@@ -23,6 +23,7 @@ export default defineConfig({
           { text: "Supported OS", link: "/introduction/os" },
           { text: "Install", link: "/introduction/install" },
           { text: "CLI & Web", link: "/introduction/web" },
+          { text: "Locations", link: "/introduction/locations" },
         ],
       },
       {
