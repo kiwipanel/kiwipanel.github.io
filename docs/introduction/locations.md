@@ -34,7 +34,7 @@ listener HTTP {
 ```
 It sets the port for the HTTP listener to 80. (instead of 8088 as default by OpenLiteSpeed) and it maps to Kiwipanel. Kiwipanel is a virtualhost that is defined in the `include /opt/kiwipanel/config/lsws/config/virtualhosts.conf` file.
 
-Second, the `include /opt/kiwipanel/config/lsws/config/virtualhosts.conf` has the following content: 
+Second, the file `include /opt/kiwipanel/config/lsws/config/virtualhosts.conf` has the following content: 
 
 ```bash
 # =========================================================

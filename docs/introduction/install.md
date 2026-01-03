@@ -23,9 +23,9 @@ curl -sLO https://raw.githubusercontent.com/kiwipanel/kiwipanel/main/install
 chmod +x install
 sudo bash install
 ```
-## Success
+## Successul Installation
 
-If the installation is successful, visit http://YOUR_SERVER_IP (**NOT** https), you will see the following information:
+If the installation is successful, visit http://YOUR_SERVER_IP (<b style = "color: red">**NOT** https </b>), you will see the following information:
 
 ![An image](/static/running.png)
 
