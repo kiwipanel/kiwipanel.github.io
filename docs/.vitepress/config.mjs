@@ -31,9 +31,9 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Greeting", link: "/features/greeting" },
+          { text: "Security Check", link: "/features/security" },
           { text: "Firewall", link: "/features/firewall" },
           { text: "Lock Mode", link: "/features/lockmode" },
-          { text: "Security Check", link: "/features/security" },
         ],
       },
       {

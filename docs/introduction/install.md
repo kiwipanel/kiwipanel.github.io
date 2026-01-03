@@ -74,6 +74,10 @@ This is the warning on **Firefox**. You can ignore it and proceed to the panel b
 - Port `8443` is used for the admin panel
 - Port `443` is opened for future Let’s Encrypt SSL certificates
 
-### Next Step
+### Log
+
+Type the command `cat /opt/kiwipanel/logs/install.log` to see the installation log in case you encounter any issues.
+
+## Next Step
 
 In the future, you might assign a domain and enable **Let’s Encrypt SSL** to replace the self-signed certificate. But for now, you can use the self-signed certificate for accessing to your admin panel, which is totally safe and normal given that we can assign a ssl certificate to a domain only, not IP.
