@@ -24,6 +24,8 @@ Modern servers fail quietly:
 
 > If something is wrong, you should see it immediately.
 
+FYI, the command is basically forked from the [Vernu vps-audit](https://github.com/vernu/vps-audit). We also **added some additional checks** to ensure the system is ready for production.
+
 ---
 
 ## Basic Usage
