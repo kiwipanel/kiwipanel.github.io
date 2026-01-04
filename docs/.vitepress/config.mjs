@@ -20,7 +20,6 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Introduction", link: "/introduction/about" },
-          { text: "Supported OS", link: "/introduction/os" },
           { text: "Install", link: "/introduction/install" },
           { text: "CLI & Web", link: "/introduction/web" },
           { text: "Locations", link: "/introduction/locations" },
@@ -40,6 +39,11 @@ export default defineConfig({
         text: "Advanced",
         collapsed: false,
         items: [{ text: "Optimization", link: "/advanced/optimization" }],
+      },
+      {
+        text: "Tutorials",
+        collapsed: false,
+        items: [{ text: "Show a public folder", link: "/how/showfolder" }],
       },
       {
         text: "Roadmaps",
