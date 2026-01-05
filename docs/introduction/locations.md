@@ -1,5 +1,12 @@
 # Location
 
+
+## Web page 
+
+- `/home/kiwiweb/default_site/index.html`: This is the default index file when you visit the IP address of your VPS.
+
+- `/home/linux_user/domain.com/public_html`: This is the home directory for each domain. You can create a new directory here and upload your (HTML or PHP) website files.
+
 ## Default locations
 Here are the folders on your VPS that Kiwipanel uses:
 - `/usr/local/bin/kiwipanel`: This is the "root" binary (written in bash) file of Kiwipanel. It is used to start and stop the Kiwipanel service. Sometimes you might use this binary to fix the permissions of the Kiwipanel binary file (written in Golang), if any. Normally everything is fine.
@@ -76,6 +83,3 @@ index {
 ```
 
 Now you might realize that the `vhRoot` is the root directory of the virtual host, and the `configFile` is the configuration file for the virtual host. We have successfully changed the default port to 80 and mapped it to Kiwipanel and the html directory is located at `/home/kiwiweb/default_site/`.
-
-## Generated locations for users
-- `/home/linux_user/domain.com/public_html`: This is the home directory for each domain.
