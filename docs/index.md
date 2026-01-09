@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: "KiwiPanel"
-  tagline: A lightweight LOMP stack panel
+  tagline: A lightweight OpenLiteSpeed stack panel
   actions:
     - theme: brand
       text: Introduction
@@ -47,5 +47,5 @@ features:
 ---
 ####
 <center>
-     <small>Last update: 3 Jan 2026. By Vuong and contributors.</small>
+     <small>Last update: 6 Jan 2026. By Vuong and contributors.</small>
 </center>

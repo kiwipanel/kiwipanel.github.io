@@ -38,12 +38,21 @@ export default defineConfig({
       {
         text: "Advanced",
         collapsed: false,
-        items: [{ text: "Optimization", link: "/advanced/optimization" }],
+        items: [
+          { text: "Optimization", link: "/advanced/optimization" },
+          {
+            text: "Standards",
+            link: "/advanced/kiwi_panel_coding_standards.md",
+          },
+        ],
       },
       {
         text: "Tutorials",
-        collapsed: false,
-        items: [{ text: "Show a public folder", link: "/how/showfolder" }],
+        collapsed: true,
+        items: [
+          { text: "Show a public folder", link: "/tutorial/showfolder" },
+          { text: "Useful Tips", link: "/tutorial/Usefultips" },
+        ],
       },
       {
         text: "Roadmaps",
