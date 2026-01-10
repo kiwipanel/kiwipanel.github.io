@@ -41,6 +41,10 @@ export default defineConfig({
         items: [
           { text: "Optimization", link: "/advanced/optimization" },
           {
+            text: "Hardening",
+            link: "/advanced/harden.md",
+          },
+          {
             text: "Standards",
             link: "/advanced/kiwi_panel_coding_standards.md",
           },
@@ -51,7 +55,7 @@ export default defineConfig({
         collapsed: true,
         items: [
           { text: "Show a public folder", link: "/tutorial/showfolder" },
-          { text: "Useful Tips", link: "/tutorial/Usefultips" },
+          { text: "Useful Tips", link: "/tutorial/usefultips" },
         ],
       },
       {

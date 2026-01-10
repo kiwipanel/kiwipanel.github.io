@@ -13,6 +13,7 @@ apt show openlitespeed
 rpm -qi openlitespeed
 
 ```
+Check the latest version of OpenLiteSpeed: https://openlitespeed.org/release-log/
 
 2) Checking installed package version (package-based install) of MariaDB: 
 ```bash
