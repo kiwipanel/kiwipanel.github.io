@@ -13,11 +13,11 @@ Look Mode can be enabled and disabled safely at any time.
 #### Hide the Web Interface
 
 ```bash
-kiwipanel hide
+kiwipanel maintain lock
 ```
 
 #### Show the Web Interface
 
 ```bash
-kiwipanel show
+kiwipanel maintain unlock
 ```

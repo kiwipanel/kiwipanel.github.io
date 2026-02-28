@@ -23,10 +23,16 @@ It is designed for:
 - VPS users who prefer lightweight tooling over heavy abstractions  
 - System administrators who value reproducibility, auditability, and control  
 
-## No Lock-In, Ever
+## Feature Comparison
 
-A core design principle of KiwiPanel is **zero lock-in**.
-
-- KiwiPanel can be **safely uninstalled at any time** using:
-  ```bash
-  kiwipanel uninstall
+| Category | Feature | KiwiPanel | aaPanel | CloudPanel | CyberPanel | FastPanel |
+|--------|--------|----------|--------|------------|------------|-----------|
+| **Users** | Admin user | ✅ | ✅ | ✅ | ✅ | ✅ |
+|  | Client users | ✅ | ✅ | ❌ | ✅ | ✅ |
+|  | User isolation | 🔒 Per-user | 🔒 Per-user | 🔒 Subscription | 🔒 Per-user | 🔒 Per-user |
+| **Web** | Web server | OpenLiteSpeed | Nginx / Apache / OLS | Nginx | OpenLiteSpeed | Nginx |
+|  | Multiple PHP versions | ✅ | ✅ | ✅ | ✅ | ✅ |
+|  | Per-site config | ✅ | ⚠️ Limited | ✅ | ⚠️ Limited | ✅ |
+| **Security** | Firewall UI | ❌ | ✅ | ✅ | ❌ | ✅ |
+|  | Malware scan | Planned | ✅ | ❌ | ⚠️ Limited | ❌ |
+|  | Auto SSL | ✅ | ✅ | ✅ | ✅ | ✅ |

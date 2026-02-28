@@ -23,7 +23,7 @@ CentOS Stream and EOL distributions are not supported.
 
 ## Install
 
-If you are installing Kiwipanel on Debian 11, run this command first:
+If you are installing Kiwipanel on Debian or the distro that does not have `curl` by default, run this command first:
 ```bash
 sudo apt update && sudo apt install curl
 ```
