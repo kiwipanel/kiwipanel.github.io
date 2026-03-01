@@ -32,9 +32,17 @@ export default defineConfig({
           { text: "Greeting", link: "/features/greeting" },
           { text: "Security Check", link: "/features/security" },
           { text: "Firewall", link: "/features/firewall" },
+          { text: "Filemanager", link: "/features/filemanager" },
           { text: "Lock Mode", link: "/features/lockmode" },
           { text: "Update", link: "/features/update" },
-          { text: "Download File", link: "/features/download" },
+        ],
+      },
+      {
+        text: "Website",
+        collapsed: false,
+        items: [
+          { text: "Terminal", link: "/website/terminal" },
+          { text: "Download File", link: "/website/download" },
         ],
       },
       {
