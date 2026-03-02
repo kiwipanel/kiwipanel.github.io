@@ -1,6 +1,6 @@
 # File Manager
 
-KiwiPanel includes a **full-featured, web-based file manager** for every website. Browse, edit, upload, download, compress, and manage files directly from the browser — no FTP client or SSH needed.
+KiwiPanel includes a **full-featured, web-based file manager** for every website, as well as a **rescue file manager** with root access for emergency recovery. Browse, edit, upload, download, compress, and manage files directly from the browser — no FTP client or SSH needed.
 
 ## Browse & Navigate
 
@@ -24,9 +24,19 @@ KiwiPanel includes a **full-featured, web-based file manager** for every website
 
 A built-in code editor powered by Ace Editor:
 
+- **Multi-tab editing** — open multiple files simultaneously, each with its own session
+- **Tab bar** — switch between open files, dirty indicator dot for unsaved changes, close with click or middle-click
+- **File tree sidebar** — collapsible and resizable tree view of the project directory
+  - Auto-expands to the currently active file
+  - Lazy-loads subdirectories on expand
+  - Toggle with the sidebar button or `Ctrl+B` / `Cmd+B`
+  - Resize by dragging the handle; width and collapsed state remembered across sessions
+- **Tree context menu** — right-click files or folders for New File, New Folder, Rename, and Delete
+- **Inline file/folder creation** — create new files or folders directly from the tree header or context menu
 - **30+ language modes** — PHP, JavaScript, Python, Go, Rust, Vue, Svelte, Nginx configs, and more
 - **Toolbar** — language selector, tab size (2sp / 4sp / hard tab), word wrap toggle, font size controls
 - **Save with `Ctrl+S` / `Cmd+S`** — with unsaved changes tracking and discard confirmation
+- **Close tab with `Ctrl+W` / `Cmd+W`**
 - **Find & Replace** — `Ctrl+F` / `Ctrl+H`
 - **Code folding** — collapse blocks for easier navigation
 - **Preferences remembered** — font size, wrap mode, and tab size saved between sessions
@@ -84,3 +94,11 @@ Deleted files go to a trash bin instead of being permanently removed:
 ## Notifications
 
 All actions provide feedback through **toast notifications** — non-intrusive messages that appear briefly without interrupting your workflow.
+
+## Rescue File Manager
+
+A separate file manager available at `/rescue/files` with **unrestricted root access** to the entire filesystem. Intended for emergency recovery and debugging:
+
+- **Token authentication** — requires a rescue token generated at install (rotate via `kiwipanel terminal rotate`)
+- **Full feature parity** with the website file manager — multi-tab editor, file tree sidebar, context menu, upload, download, compression, search, trash, and permissions
+- Accessible from the **Quick Actions** section on the dashboard
