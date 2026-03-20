@@ -1,0 +1,159 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+:root {
+    --vp-font-family-base: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --vp-font-family-mono: "IBM Plex Mono", "Courier New", monospace;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings:
+        "kern" 1,
+        "liga" 1;
+}
+
+/* Body text */
+.vp-doc p,
+.vp-doc li {
+    font-weight: 400;
+    line-height: 1.75;
+    letter-spacing: 0.01em;
+    font-size: 15px;
+}
+
+/* Headings */
+.vp-doc h1 {
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+}
+
+.vp-doc h2 {
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    border-bottom: 1px solid var(--vp-c-divider);
+    padding-bottom: 10px;
+}
+
+.vp-doc h3 {
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.005em;
+}
+
+.vp-doc h4,
+.vp-doc h5,
+.vp-doc h6 {
+    font-weight: 600;
+    line-height: 1.45;
+    letter-spacing: 0;
+}
+
+/* Navigation */
+.VPNavBarTitle .title {
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.VPNavBarMenuLink .VPLink,
+.VPNavBar .menu-text {
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    font-size: 14px;
+}
+
+/* Sidebar */
+.VPSidebar .text {
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+
+.VPSidebarItem.is-active > .item > .indicator + .link > .text {
+    font-weight: 600;
+}
+
+.VPSidebarItem .is-link > .text {
+    font-weight: 400;
+}
+
+/* Hero section */
+.VPHero .name,
+.VPHero .text {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.VPHero .tagline {
+    font-weight: 400;
+    line-height: 1.65;
+    letter-spacing: 0.01em;
+}
+
+/* Code blocks */
+.vp-doc code,
+.vp-doc pre code {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0;
+    line-height: 1.65;
+}
+
+/* Inline code */
+.vp-doc :not(pre) > code {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Blockquotes */
+.vp-doc blockquote {
+    border-left: 3px solid var(--vp-c-divider);
+}
+
+.vp-doc blockquote p {
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.7;
+    color: var(--vp-c-text-2);
+}
+
+/* Tables */
+.vp-doc table th {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    font-size: 13.5px;
+    text-transform: none;
+}
+
+.vp-doc table td {
+    font-weight: 400;
+    line-height: 1.55;
+    font-size: 14px;
+}
+
+/* Strong / bold - IBM Plex looks sharp at 600 */
+.vp-doc strong {
+    font-weight: 600;
+}
+
+/* Links */
+.vp-doc a {
+    font-weight: 500;
+}
+
+/* Feature cards on home page */
+.VPFeature .title {
+    font-weight: 600;
+    letter-spacing: 0;
+}
+
+.VPFeature .details {
+    font-weight: 400;
+    line-height: 1.65;
+    font-size: 14px;
+}
