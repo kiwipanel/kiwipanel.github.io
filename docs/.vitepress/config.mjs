@@ -33,6 +33,7 @@ export default defineConfig({
           { text: "Security Check", link: "/features/security" },
           { text: "Firewall", link: "/features/firewall" },
           { text: "Filemanager", link: "/features/filemanager" },
+          { text: "PHP Security", link: "/features/phpsecurity" },
           { text: "Lock Mode", link: "/features/lockmode" },
           { text: "Update", link: "/features/update" },
         ],
