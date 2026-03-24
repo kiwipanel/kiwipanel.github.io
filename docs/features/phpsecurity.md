@@ -110,18 +110,24 @@ Blocks dangerous PHP functions at the engine level. Applied via a global drop-in
 
 ### Presets
 
-**Standard** (default) — blocks 27 functions:
+**Standard** (default) — blocks 40 functions:
 
 | Category | Functions blocked |
 |----------|------------------|
 | Command execution | `exec`, `system`, `passthru`, `shell_exec` |
 | Process control | `proc_open`, `popen`, `proc_close`, `proc_get_status`, `proc_nice`, `proc_terminate` |
-| POSIX/process | `pcntl_exec`, `pcntl_fork`, `pcntl_signal`, `pcntl_waitpid`, `pcntl_wexitstatus`, `pcntl_wifexited`, `pcntl_wifsignaled`, `pcntl_wifstopped`, `pcntl_wstopsig`, `pcntl_wtermsig`, `pcntl_alarm` |
-| Dangerous system | `dl`, `putenv`, `symlink`, `link`, `chown`, `chgrp`, `chmod` |
+| POSIX/process | `pcntl_exec`, `pcntl_fork`, `pcntl_signal`, `pcntl_waitpid`, `pcntl_wexitstatus`, `pcntl_wifexited`, `pcntl_wifsignaled`, `pcntl_wifstopped`, `pcntl_wstopsig`, `pcntl_wtermsig`, `pcntl_alarm`, `pcntl_wait`, `pcntl_wifcontinued`, `pcntl_signal_dispatch`, `pcntl_get_last_error`, `pcntl_strerror`, `pcntl_sigprocmask`, `pcntl_sigwaitinfo`, `pcntl_sigtimedwait`, `pcntl_getpriority`, `pcntl_setpriority` |
+| Filesystem | `symlink`, `link`, `chown`, `chgrp`, `chmod`, `readlink`, `chroot` |
+| Dynamic loading | `dl` |
+| Runtime settings | `ini_alter`, `ini_restore` |
+| System logging | `openlog`, `syslog` |
+| IMAP | `imap_open` (known RCE vector via `--rsh`) |
 
 **Relaxed** — for sites that need WP-CLI, Composer, or Laravel Artisan:
 
-Allows `exec`, `system`, `shell_exec`, `proc_open`, `popen`, `chown`, `chgrp`, `chmod`. Still blocks all `pcntl_*`, `dl`, `putenv`, `symlink`, `link`.
+Allows `exec`, `system`, `shell_exec`, `proc_open`, `popen`, `putenv`, `chown`, `chgrp`, `chmod`. Still blocks all `pcntl_*`, `dl`, `symlink`, `link`.
+
+> **Why is `putenv()` allowed in Relaxed?** Laravel uses `vlucas/phpdotenv` to load `.env` files, which calls `putenv()` internally. If you're running Laravel, Lumen, or any framework that reads `.env` via phpdotenv, you need the Relaxed preset (or use the Allowed Functions field with Standard preset).
 
 **None** — no restrictions. Only recommended for fully trusted, single-tenant servers.
 
@@ -195,8 +201,19 @@ Go to **Settings → PHP Security** to configure server-wide defaults that apply
 Go to **Website → PHP Settings → Security** to customize settings for individual websites:
 
 - Use a different `disable_functions` preset
+- Allow specific functions from the blocked preset (e.g., `putenv` for Laravel)
 - Add extra `open_basedir` paths
 - Adjust session and header settings
+
+#### Allowed Functions
+
+If you need just one or two extra functions without switching to a different preset, use the **Allowed Functions** field. This field is shown when using the **Standard** or **Relaxed** preset.
+
+For example:
+- Enter `putenv` to allow Laravel's `.env` loading while keeping the rest of the Standard blocklist
+- Enter `putenv,exec` to allow both functions without enabling all the functions in the Relaxed preset
+
+The system automatically removes the specified functions from the preset's blocklist under the hood.
 
 When no override is set, the website automatically inherits the global defaults.
 
