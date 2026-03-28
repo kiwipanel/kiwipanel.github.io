@@ -44,6 +44,7 @@ export default defineConfig({
         items: [
           { text: "Terminal", link: "/website/terminal" },
           { text: "Download File", link: "/website/download" },
+          { text: "PHP Settings", link: "/website/phpsetting" },
         ],
       },
       {
