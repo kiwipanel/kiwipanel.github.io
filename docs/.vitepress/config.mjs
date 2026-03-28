@@ -35,6 +35,7 @@ export default defineConfig({
           { text: "Filemanager", link: "/features/filemanager" },
           { text: "PHP Security", link: "/features/phpsecurity" },
           { text: "Lock Mode", link: "/features/lockmode" },
+          { text: "Health", link: "/features/health" },
           { text: "Update", link: "/features/update" },
         ],
       },
