@@ -184,7 +184,7 @@ Your administrator may disable custom directives for your account. If the custom
 
 ## Security Settings
 
-Each website has its own PHP security configuration. These settings provide defense-in-depth protection against common PHP attacks. For a complete guide to PHP security layers, see [PHP Security](./php-security).
+Each website has its own PHP security configuration. These settings provide defense-in-depth protection against common PHP attacks. For a complete guide to PHP security layers, see [PHP Security](../features/phpsecurity).
 
 ### disable_functions
 
