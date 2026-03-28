@@ -1,271 +1,267 @@
-# Update
+# Updating KiwiPanel
 
-By default, KiwiPanel does not update automatically. You must log in to the web panel to check whether a new version is available and explicitly decide whether to apply the update.
+KiwiPanel does **not** update automatically. You must explicitly check for new versions and choose when to apply updates. The update system is designed for zero-downtime — the page automatically reloads once the new version is running.
 
-## 1. Purpose
+## Checking for Updates
 
-This document defines the official, supported update mechanism for KiwiPanel.
+### From the Dashboard
 
-The goals of the update system are:
+1. Navigate to **System → Update** (or go to `https://your-server:8443/dashboard/update`)
+2. The page automatically checks for the latest version on load
+3. You'll see one of two states:
 
-- Secure self-update without privilege escalation
-- Strict separation of concerns between web and root contexts
-- Atomic binary replacement with rollback guarantees
-- Deterministic state reporting for UI and automation
-- Compatibility with systemd-managed Linux systems
+**System is up to date:**
+> ✅ System is up to date  
+> Current version: 0.7.0 (latest: 0.7.0)
 
-Any change to this specification **MUST** be backward-compatible or require a specification version bump.
+**Update available:**
+> ℹ️ Update available: 0.8.0  
+> Current: 0.7.0 → Latest: 0.8.0
 
----
+You can also click the **Check for Updates** button at any time to re-check.
 
-## 2. Design Principles
+### From the CLI
 
-KiwiPanel updates follow these principles:
+```bash
+kiwipanel panel update
+```
 
-### Least Privilege
-- Web processes never run as root
-- Root operations are isolated and explicit
+This checks GitHub for the latest release and compares it against your installed version using semver.
 
-### Atomicity
-- Updates either fully succeed or are fully rolled back
-- No partial or inconsistent states are allowed
+## Applying an Update
 
-### Immutability
-- The running binary is replaced, never modified in place
-- All staging happens outside the live execution path
+When an update is available, the **Apply Update** button appears. The entire process is automated:
 
-### Recoverability
-- The previous binary is preserved until success is confirmed
-- Rollback is automatic on failure
+1. Click **Apply Update** and confirm the prompt
+2. The update runs in the background — you can watch progress in real-time via the status log
+3. When the service restarts, a "Service is restarting" overlay appears automatically
+4. Once the service is back online, the page reloads itself
 
-### Observability
-- All update states are externally visible
-- Errors are machine-readable and timestamped
+::: tip
+You do not need to stay on the page. The update continues in the background even if you close the browser. You can return to the update page later to see the result.
+:::
 
----
+### What Happens Behind the Scenes
 
-## 3. High-Level Architecture
+The update follows a strict pipeline:
 
+```
+Apply Update clicked
+    │
+    ├─ 1. Cleanup any previous failed update
+    ├─ 2. Fetch latest release from GitHub
+    ├─ 3. Match binary for your OS/architecture
+    ├─ 4. Download panel binary + SHA-256 verify
+    ├─ 5. Download agent binary + SHA-256 verify
+    ├─ 6. Write staging metadata (staged.json)
+    ├─ 7. Create staged flag file
+    │
+    ├─ systemd detects the flag automatically:
+    │      kiwipanel-update.path → triggers kiwipanel-update.service
+    │
+    └─ Update apply (runs as root):
+           1. Validate binary (ELF magic bytes)
+           2. Verify SHA-256 checksum
+           3. Stop kiwipanel.service
+           4. Backup current binary → .bak
+           5. Install new binary
+           6. Start kiwipanel.service
+           7. Health check (systemctl + TCP port 8443)
+           8. Apply agent update (if available)
+           9. Update version metadata
+          10. Write status "done"
+```
 
----
+### Status States
 
-## 4. Privilege Model
+The update page shows real-time progress via Server-Sent Events (SSE):
 
-### 4.1 Web Panel (Non-Root)
+| State | What's happening |
+|-------|-----------------|
+| **Checking** | Querying GitHub for the latest version |
+| **Available** | New version found, waiting for you to apply |
+| **Downloading** | Downloading binaries from GitHub |
+| **Validating** | Checking binary format (ELF) |
+| **Verifying** | Verifying SHA-256 checksums |
+| **Installing** | Replacing binaries + restarting the service |
+| **Finalizing** | Updating version metadata and cleanup |
+| **Ready** | Staged and waiting for systemd to apply |
+| **Done** | Update complete ✅ |
+| **Error** | Something failed — click Retry |
 
-**Runs as:** `kiwipanel:kiwisecure`
+## Automatic Rollback
 
-**Responsibilities:**
-- Download update artifacts
-- Write staging files
-- Report update status
+If anything goes wrong during the update, KiwiPanel automatically rolls back:
 
-**MUST NOT:**
-- Replace binaries
-- Control systemd services
-- Write outside the update directory
+- **Service fails to start** → previous binary is restored, service restarted
+- **Health check fails** (service not responding on port 8443 within 30s) → rollback triggered
+- **Checksum mismatch** → update aborted before any binary replacement
 
----
+The previous binary is always preserved as a `.bak` file until the update succeeds.
 
-### 4.2 Update Apply (Root)
+::: warning
+Rollback restores the previous version automatically. If you see an error state, click **Retry** to attempt the update again, or check the update logs for details.
+:::
 
-**Runs as:** `root`
+## Service Restart Detection
 
-**Invoked via:**
-- systemd service, or
-- CLI command:  
-  `kiwipanel panel update apply`
+When the service restarts during an update, the browser loses its SSE connection. KiwiPanel handles this gracefully:
 
-**Responsibilities:**
-- Validate staged updates
-- Replace the production binary
-- Control systemd services
-- Perform rollback when required
+1. A **"Service is restarting"** overlay appears with a countdown timer
+2. The page polls the `/ping` endpoint every 3 seconds
+3. Once the service responds, it shows "Service is back!" and reloads the page automatically
 
----
+The `/ping` endpoint is unauthenticated and lightweight — it works even when sessions are cleared by the restart.
 
-## 5. Filesystem Layout (Authoritative)
+## Security Model
 
-### 5.1 Binary Locations
+### Privilege Separation
 
-| Path | Purpose |
-|-----|--------|
-| `/opt/kiwipanel/bin/kiwipanel` | Active production binary |
-| `/opt/kiwipanel/bin/kiwipanel.bak` | Backup binary |
-| `/usr/local/bin/kiwipanel` | Root-owned wrapper |
+The update process uses strict privilege separation:
 
----
+| Component | Runs as | What it does |
+|-----------|---------|--------------|
+| Web panel | `kiwipanel:kiwisecure` | Downloads, verifies, stages binaries |
+| Update apply | `root` (via systemd) | Replaces binaries, restarts services |
 
-### 5.2 Update Directory
+The web panel **never** runs as root. Binary replacement and service control are delegated to a systemd oneshot service.
 
-**Ownership:**
-- User: `kiwipanel`
-- Group: `kiwisecure`
+### Integrity Verification
 
-**Permissions:**
-- Directories: `0750`
-- Files: `0640`
+Every downloaded binary goes through:
 
----
+1. **SHA-256 checksum** — computed during download and compared against the release manifest
+2. **ELF validation** — binary must contain valid ELF magic bytes (`0x7F 'E' 'L' 'F'`)
+3. **Atomic staging** — binaries are downloaded to `.tmp`, verified, then renamed (no partial writes)
 
-## 6. Update Trigger (systemd)
+### Concurrency Protection
 
-### 6.1 Path Unit
+A file lock (`apply.lock`) prevents multiple updates from running simultaneously. If an update is already in progress, additional attempts fail immediately.
 
-```ini
-# /etc/systemd/system/kiwipanel-update.path
+## Filesystem Layout
+
+```
+/var/lib/kiwipanel/update/
+├── status.json          # Current update status (read by SSE)
+├── staged               # Flag file — triggers systemd path unit
+├── staged.json          # Metadata: version, URLs, checksums
+├── kiwipanel.new        # Staged panel binary
+├── kiwipanel-agent.new  # Staged agent binary (if available)
+└── apply.lock           # Prevents concurrent updates
+
+/opt/kiwipanel/bin/
+├── kiwipanel            # Active panel binary
+├── kiwipanel.bak        # Previous version (rollback target)
+├── kiwipanel-agent      # Active agent binary
+└── kiwipanel-agent.bak  # Previous agent version
+
+/opt/kiwipanel/meta/
+└── current.version      # Version metadata
+```
+
+## systemd Units
+
+The update is triggered automatically by a systemd path unit:
+
+::: code-group
+
+```ini [kiwipanel-update.path]
+[Unit]
+Description=Watch for KiwiPanel staged updates
+
 [Path]
-PathExists=/var/lib/kiwipanel/update/staged
+PathModified=/var/lib/kiwipanel/update/staged
+Unit=kiwipanel-update.service
+TriggerLimitIntervalSec=30
+TriggerLimitBurst=3
 
 [Install]
 WantedBy=multi-user.target
-
 ```
-6.2 Service Unit
 
-The update service is triggered automatically when the staged file appears.
+```ini [kiwipanel-update.service]
+[Unit]
+Description=KiwiPanel Apply Staged Update
+After=network.target
 
-7. Update State Machine
+[Service]
+Type=oneshot
+ExecStart=/opt/kiwipanel/bin/kiwipanel panel update apply
+User=root
+Group=root
+TimeoutStartSec=300
 
-The update process follows a strict linear state model:
+[Install]
+WantedBy=multi-user.target
+```
 
-STAGED
-  ↓
-VALIDATING
-  ↓
-VERIFYING
-  ↓
-STOPPING
-  ↓
-INSTALLING
-  ↓
-STARTING
-  ↓
-HEALTHY
-  ↓
-FINALIZING
-  ↓
-DONE
+:::
 
+When `PrepareUpdate()` creates the `/var/lib/kiwipanel/update/staged` flag file, the path unit detects it and triggers the update service, which runs `kiwipanel panel update apply` as root.
 
-If any step fails:
+## Troubleshooting
 
-State transitions to ERROR
+### Update stuck on "Checking..."
 
-Rollback is attempted immediately
+The version check has a 10-second timeout. If your server can't reach GitHub's API (`api.github.com`), the check will fail. Verify:
 
-8. Validation & Verification
-8.1 Binary Validation
+```bash
+curl -s https://api.github.com/repos/kiwipanel/kiwipanel/releases/latest | head -5
+```
 
-The staged binary MUST:
+### Update failed with "No binary found for linux/amd64"
 
-Be executable
+The release doesn't include a binary for your platform. Check that the release has an asset named `kiwipanel-linux-amd64` (or your OS/arch combination).
 
-Not be a symlink
+### "Another update is already running"
 
-Contain valid ELF magic bytes (0x7F 45 4C 46)
+An update lock file exists. Wait for the current update to finish, or if it's stuck:
 
-8.2 Integrity Verification
+```bash
+rm /var/lib/kiwipanel/update/apply.lock
+```
 
-A SHA-256 checksum is computed for the staged binary
+### Service didn't restart after staging
 
-The checksum MUST match the value in staged.json
+Check if the systemd path unit is active:
 
+```bash
+systemctl status kiwipanel-update.path
+```
 
-A checksum mismatch MUST abort the update.
+If it's not running:
 
-9. Locking & Concurrency
+```bash
+systemctl enable --now kiwipanel-update.path
+```
 
-A file lock (apply.lock) is acquired before applying updates
+### Manual rollback
 
-Only one update may run at a time
+If you need to manually restore the previous version:
 
-Concurrent attempts MUST fail immediately
+```bash
+systemctl stop kiwipanel.service
+cp /opt/kiwipanel/bin/kiwipanel.bak /opt/kiwipanel/bin/kiwipanel
+systemctl start kiwipanel.service
+```
 
-10. Installation & Rollback
-10.1 Install Procedure
+### View update logs
 
-Stop kiwipanel.service
+Update events are logged to `/var/log/kiwipanel/update.log`. You can also view them from the dashboard at **System → Update Logs**.
 
-Rename current binary to .bak
+## API Reference
 
-Rename kiwipanel.new to the production path
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/dashboard/update` | Admin | Render the update page |
+| `GET` | `/dashboard/update/check` | Admin | Lightweight version check — returns `{current, latest, available}` |
+| `GET` | `/dashboard/update/status` | Admin | SSE stream of update progress |
+| `POST` | `/dashboard/update/prepare` | Admin | Start update (download + stage) — returns 202 immediately |
+| `GET` | `/ping` | None | Health check for restart detection — returns `{"status":"ok"}` |
 
-Apply ownership and permissions
+### CLI Commands
 
-Start kiwipanel.service
-
-10.2 Rollback Conditions
-
-Rollback occurs if:
-
-The service fails to start
-
-The health check fails
-
-Any post-install step errors
-
-Rollback procedure:
-
-Restore the .bak binary
-
-Restart the service
-
-11. Health Check
-
-After restart, the service MUST:
-
-Report systemctl is-active = active
-
-Accept TCP connections on localhost:8443
-
-Timeout: 30 seconds
-Failure triggers rollback.
-
-12. Status Reporting
-12.1 Status File Format
-{
-  "state": "installing",
-  "message": "Installing new binary",
-  "error": "",
-  "time": "2026-01-14T07:48:13Z"
-}
-
-12.2 State Semantics
-State	Meaning
-staged	Update detected
-validating	Binary format checks
-verifying	Integrity checks
-installing	Binary replacement
-finalizing	Cleanup
-done	Success
-error	Failure (rollback attempted)
-13. Wrapper Contract
-
-/usr/local/bin/kiwipanel:
-
-Is root-owned
-
-Verifies:
-
-Binary existence
-
-Permissions
-
-Ownership
-
-Non-symlink status
-
-Delegates execution to /opt/kiwipanel/bin/kiwipanel
-
-This wrapper is mandatory and part of the security model.
-
-14. Compatibility Guarantees
-
-Update directory paths are stable
-
-Status file schema is stable
-
-Update trigger mechanism is stable
-
-Breaking changes require a new specification version.
+| Command | Description |
+|---------|-------------|
+| `kiwipanel panel update` | Check if an update is available |
+| `kiwipanel panel update apply` | Apply a staged update (requires root) |
