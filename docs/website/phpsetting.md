@@ -184,7 +184,7 @@ Your administrator may disable custom directives for your account. If the custom
 
 ## Security Settings
 
-PHP security is split into two tiers: **global settings** managed server-wide, and **per-website overrides** for `open_basedir` only. For a complete guide to PHP security layers, see [PHP Security](./php-security).
+PHP security is split into two tiers: **global settings** managed server-wide, and **per-website overrides** for `open_basedir` only. For a complete guide to PHP security layers, see [PHP Security](../features/phpsecurity).
 
 ### Global Security Settings (PHP_INI_SYSTEM)
 
