@@ -43,7 +43,9 @@ export default defineConfig({
         text: "Website",
         collapsed: false,
         items: [
+          { text: "Create A Website", link: "/website/create" },
           { text: "Terminal", link: "/website/terminal" },
+          { text: "Logs", link: "/website/log" },
           { text: "Download File", link: "/website/download" },
           { text: "PHP Settings", link: "/website/phpsetting" },
         ],
