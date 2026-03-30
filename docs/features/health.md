@@ -20,7 +20,7 @@ The scan covers **50+ checks** across these categories:
 | **Network** | Ports (80, 443, 7080, 8443, 3306, 6379), DNS resolution, external connectivity |
 | **Security** | SSH config, firewall (UFW/iptables/nftables), SUID files, UID0 users, sudo rules, pending updates |
 | **Filesystem** | Required directories, file permissions |
-| **KiwiPanel** | Process status, binary permissions, SSL certificates, HTTPS connectivity |
+| **KiwiPanel** | Process status, binary permissions, SSL certificates, HTTPS connectivity, Linux users DB↔OS consistency |
 
 ### From the CLI
 
@@ -31,6 +31,49 @@ kiwipanel health
 # Run with auto-fix for common issues
 kiwipanel health --fix
 ```
+
+## Linux Users Consistency Check
+
+KiwiPanel creates one dedicated Linux user per website (e.g., `web_abc123` with UID >= 20000). The Linux user record is stored in the panel database **and** created on the OS via the agent. These are two independent operations — if the agent fails after the DB insert, the database says the user exists but the OS disagrees.
+
+The `kiwipanel:linux_users` health check detects this mismatch:
+
+1. The panel queries the `linux_users` DB table for all usernames
+2. The panel sends the list to the agent via `POST /v1/system-users/verify`
+3. The agent parses `/etc/passwd`, filters UIDs in the KiwiPanel range (20000–59999), and compares
+4. Any discrepancies are reported
+
+### Possible Results
+
+| Result | Meaning |
+|--------|---------|
+| ✅ `5 linux users consistent (DB = OS)` | All DB users exist on the OS — everything is in sync |
+| ❌ `2 in DB but not on OS: web_abc, web_def` | Website was created in the panel but the agent failed to create the OS user. File operations, terminal, and PHP will not work for these websites |
+| ❌ `1 orphaned on OS: web_old` | An OS user exists in the KiwiPanel UID range but has no matching DB record. This can happen if a website was deleted from the DB but the agent failed to remove the OS user |
+
+### How to Fix Mismatches
+
+**Users in DB but not on OS** — the website creation partially failed:
+- Re-trigger the user creation by visiting the website's detail page (the panel will attempt to sync)
+- Or manually create the OS user: `useradd -u <uid> -g <gid> -d <home> -s /usr/sbin/nologin -M <username>`
+
+**Orphaned OS users** — leftover from a failed deletion:
+- Verify the user is genuinely orphaned (no matching website in the panel)
+- Remove manually: `userdel <username>` and clean up the home directory
+
+### Technical Details
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| SQLC query | `internal/modules/users/queries/users.sql` | `ListAllLinuxUsernames` — fetches all DB usernames |
+| Agent handler | `internal/agent/verify_users.go` | `VerifySystemUsers` — parses `/etc/passwd`, compares against DB list |
+| Agent route | `cmd/agent/main.go` | `POST /v1/system-users/verify` |
+| Dashboard injection | `internal/modules/dashboard/transport/http/health.go` | `checkLinuxUsersConsistency()` — orchestrates the DB→agent comparison |
+| Check manifest | `pkg/health/check.go` | `kiwipanel:linux_users` placeholder in `GetAllChecks()` |
+
+::: tip
+On development machines (macOS), the agent skips the `/etc/passwd` scan and reports all DB users as matched, since no real KiwiPanel OS users exist in development.
+:::
 
 ## Public Health Endpoint
 
@@ -220,6 +263,7 @@ From the dashboard health page, you can also click **Download JSON** to save the
 | `GET` | `/dashboard/api/support-token` | Admin session | Get current token status |
 | `POST` | `/dashboard/api/support-token` | Admin session | Generate new token |
 | `DELETE` | `/dashboard/api/support-token` | Admin session | Revoke current token |
+| `POST` | `/v1/system-users/verify` | Agent (local only) | Compare DB linux usernames against OS `/etc/passwd` |
 
 ### CLI Commands
 
