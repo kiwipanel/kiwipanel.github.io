@@ -154,6 +154,14 @@ Returns the complete health report including version info:
 The full report contains **sensitive security information** (SSH config, firewall rules, system users, IP addresses). Only share the support token with trusted parties.
 :::
 
+::: info
+The support URL does **not** include the **Linux Users DB↔OS consistency check**. This check requires database and agent access, which are only available locally. If support needs to verify linux user consistency, ask the server admin to run:
+```bash
+kiwipanel repair linux-users --check-only
+```
+and share the output.
+:::
+
 ## Generating a Support Token
 
 Support tokens are temporary (valid for **4 hours**) and give read-only access to the full health report. You can generate them from either the dashboard or the CLI.
