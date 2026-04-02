@@ -14,7 +14,7 @@ hero:
       link: /introduction/install
     - theme: alt
       text: Github
-      link: https://github.com/kiwipanel/kiwipanel
+      link: https://github.com/kiwipanel/install
 features:
   - title: 🧩 Made for WordPress & PHP
     details: >
@@ -33,7 +33,7 @@ features:
 
   - title: 🌱 Source-available
     details: >
-      License: Source-available. Free for personal use. See <a href="https://github.com/kiwipanel/kiwipanel" target="_blank">GitHub</a>
+      License: Source-available. Free for personal use. See <a href="https://github.com/kiwipanel/install" target="_blank">GitHub</a>
 
   - title: 🔓 No Lock-In
     details: >
@@ -47,5 +47,5 @@ features:
 ---
 ####
 <center>
-     <small>Last update: 20 March 2026. By Vuong and contributors.</small>
+     <small>Last update: 02 Apr 2026. By Vuong and contributors.</small>
 </center>

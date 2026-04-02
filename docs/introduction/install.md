@@ -4,11 +4,11 @@
 
 KiwiPanel supports non-EOL Linux distributions officially supported by OpenLiteSpeed.
 
-- Debian 11, 12, 13
+- Debian 12, 13
 - Ubuntu LTS 22.04, 24.04
-- Rocky Linux 8, 9, 10
-- AlmaLinux 8, 9, 10
-- RHEL 8, 9 and compatible derivatives
+- Rocky Linux 9, 10
+- AlmaLinux 9, 10
+- RHEL 9 and compatible derivatives
 
 CentOS Stream and EOL distributions are not supported.
 
@@ -29,11 +29,11 @@ sudo apt update && sudo apt install curl
 ```
 **Quick install (advanced users):**
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/kiwipanel/kiwipanel/main/install)
+bash <(curl -fsSL https://raw.githubusercontent.com/kiwipanel/install/main/install)
 ```
 **Recommended (review before install):**
 ```bash
-curl -sLO https://raw.githubusercontent.com/kiwipanel/kiwipanel/main/install
+curl -sLO https://raw.githubusercontent.com/kiwipanel/install/main/install
 chmod +x install
 sudo bash install
 ```
