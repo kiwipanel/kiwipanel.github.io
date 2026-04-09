@@ -36,6 +36,7 @@ export default defineConfig({
           { text: "PHP Security", link: "/features/phpsecurity" },
           { text: "Lock Mode", link: "/features/lockmode" },
           { text: "Health", link: "/features/health" },
+          { text: "Self Healing", link: "/features/selfheal" },
           { text: "Update", link: "/features/update" },
         ],
       },
