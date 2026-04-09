@@ -5,7 +5,7 @@ KiwiPanel lets you manage each installed PHP version from a single page. Monitor
 Navigate to **Settings &rarr; Services** and click on a PHP version to open the management page.
 
 ::: tip
-This page manages **server-wide** settings that affect all websites using a given PHP version. For per-website PHP settings (memory limit, error handling, open_basedir, etc.), see [PHP Settings](./php-settings).
+This page manages **server-wide** settings that affect all websites using a given PHP version. For per-website PHP settings (memory limit, error handling, open_basedir, etc.), see [PHP Settings](/website/phpsetting).
 :::
 
 ---
@@ -194,7 +194,7 @@ This section shows security directives and the current `disable_functions` list.
 | `disable_functions` | *(preset)* | Comma-separated list of blocked PHP functions. |
 
 ::: info
-The `disable_functions` list on this page shows the value from the global drop-in ini. The **security preset** (Standard, Relaxed, None, Custom) configured at [Settings &rarr; PHP Security](./php-security) takes precedence via a separate drop-in file that loads after this one. To change the preset, go to **Settings &rarr; PHP Security**.
+The `disable_functions` list on this page shows the value from the global drop-in ini. The **security preset** (Standard, Relaxed, None, Custom) configured at [Settings &rarr; PHP Security](./phpsecurity) takes precedence via a separate drop-in file that loads after this one. To change the preset, go to **Settings &rarr; PHP Security**.
 :::
 
 ### How Configuration Is Stored
@@ -314,8 +314,8 @@ Understanding which settings apply where:
 | Scope | What it controls | Where to configure |
 |-------|------------------|--------------------|
 | **Global (this page)** | Server-wide php.ini defaults, OPcache tuning, LSAPI performance, extensions | Settings &rarr; Services &rarr; PHP X.Y |
-| **Global security** | `disable_functions`, `expose_php`, `allow_url_include`, session hardening, chroot | [Settings &rarr; PHP Security](./php-security) |
-| **Per-website** | `memory_limit`, `max_execution_time`, upload sizes, error handling, `open_basedir` | [Websites &rarr; (site) &rarr; PHP](./php-settings) |
+| **Global security** | `disable_functions`, `expose_php`, `allow_url_include`, session hardening, chroot | [Settings &rarr; PHP Security](./phpsecurity) |
+| **Per-website** | `memory_limit`, `max_execution_time`, upload sizes, error handling, `open_basedir` | [Websites &rarr; (site) &rarr; PHP](/website/phpsetting) |
 
 **Precedence order** (later overrides earlier):
 
