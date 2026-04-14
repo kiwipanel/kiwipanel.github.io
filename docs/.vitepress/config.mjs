@@ -35,6 +35,7 @@ export default defineConfig({
           { text: "Filemanager", link: "/features/filemanager" },
           { text: "PHP Global Setting", link: "/features/phpmanage" },
           { text: "PHP Security", link: "/features/phpsecurity" },
+          { text: "Opcache", link: "/features/opcache" },
           { text: "Lock Mode", link: "/features/lockmode" },
           { text: "Health", link: "/features/health" },
           { text: "Self Healing", link: "/features/selfheal" },
