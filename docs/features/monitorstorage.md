@@ -18,6 +18,8 @@ The worst part? It usually happens silently. By the time you notice, the damage 
 
 The **Storage** page gives you a real-time view of every disk on your server — no terminal needed.
 
+![An image](/static/feature_monitor_storage.png)
+
 ### Disk Overview
 
 See all mounted filesystems at a glance with:
