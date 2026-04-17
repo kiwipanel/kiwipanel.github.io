@@ -39,6 +39,7 @@ export default defineConfig({
           { text: "Lock Mode", link: "/features/lockmode" },
           { text: "Health", link: "/features/health" },
           { text: "Self Healing", link: "/features/selfheal" },
+          { text: "Monitor Storage", link: "/features/monitorstorage" },
           { text: "Global Logs", link: "/features/log" },
           { text: "Update", link: "/features/update" },
         ],
