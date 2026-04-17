@@ -163,13 +163,13 @@ One row per backup execution (manual or scheduled).
 | **Files** | `files` | Only the website document root directory. No database operations. |
 | **Database** | `database` | Only MySQL dumps via `mysqldump`. No file operations. |
 
-Defined in [`domain.BackupScope`](internal/modules/backups/domain/backup.go:10).
+Defined in `domain.BackupScope`.
 
 ---
 
 ## 5. Backup Workflow (7 Steps)
 
-The 7-step workflow is implemented in [`executeBackup()`](internal/agent/backup.go:112). Each step reports progress to the panel callback URL.
+The 7-step workflow is implemented in `executeBackup()`. Each step reports progress to the panel callback URL.
 
 ### Step 1: `prepare`
 
@@ -216,7 +216,7 @@ The 7-step workflow is implemented in [`executeBackup()`](internal/agent/backup.
 
 - Records archive metadata (size, checksum) via `os.Stat`
 - Writes `metadata.json` sidecar file (see [§15](#15-file-system-layout))
-- Calls [`checkDiskUsageAlert()`](internal/agent/backup_throttle.go:54) — logs a warning if disk usage exceeds 85%
+- Calls `checkDiskUsageAlert()` — logs a warning if disk usage exceeds 85%
 - Reports final progress with archive path, size, and SHA-256
 
 After all 7 steps, the staging directory is removed via `defer os.RemoveAll(staging)`.
@@ -225,7 +225,7 @@ After all 7 steps, the staging directory is removed via `defer os.RemoveAll(stag
 
 ## 6. Restore Workflow
 
-Implemented in [`executeRestore()`](internal/agent/backup_restore.go:93). The restore has 7 steps plus a finalize:
+Implemented in `executeRestore()`. The restore has 7 steps plus a finalize:
 
 ### Step 1: `restore_verify`
 
@@ -282,7 +282,7 @@ The panel stores schedule config in the `backup_jobs` table and converts it to a
 
 **Frequency options:** `daily`, `weekly`, `monthly`
 
-**Cron conversion** ([`frequencyToCron()`](internal/modules/backups/business/service.go:269)):
+**Cron conversion** (`frequencyToCron()`):
 
 | Frequency | Time | Cron Expression |
 |-----------|------|-----------------|
@@ -292,7 +292,7 @@ The panel stores schedule config in the `backup_jobs` table and converts it to a
 
 ### Agent-Side Scheduler
 
-The agent maintains its own scheduler ([`BackupScheduler`](internal/agent/backup_scheduler.go:31)) with:
+The agent maintains its own scheduler (`BackupScheduler`) with:
 
 - A ticker that fires every **60 seconds** to check for due backups
 - Schedule entries persisted to `/etc/kiwipanel/backup_schedules.json`
@@ -319,13 +319,13 @@ The agent maintains its own scheduler ([`BackupScheduler`](internal/agent/backup
 ]
 ```
 
-When a schedule is due, the scheduler calls [`executeBackup()`](internal/agent/backup.go:112) directly (in a goroutine) and then advances `next_run` using [`calculateNextRun()`](internal/agent/backup_scheduler.go:195).
+When a schedule is due, the scheduler calls `executeBackup()` directly (in a goroutine) and then advances `next_run` using `calculateNextRun()`.
 
 ---
 
 ## 8. Retention Policy
 
-Retention is **count-based**, not time-based. After each successful backup, [`cleanupOldBackups()`](internal/modules/backups/business/service.go:115) runs:
+Retention is **count-based**, not time-based. After each successful backup, `cleanupOldBackups()` runs:
 
 1. Counts all completed `backup_runs` for the job
 2. If `count > retention_count`, calculates `excess = count - retention_count`
@@ -335,7 +335,7 @@ Retention is **count-based**, not time-based. After each successful backup, [`cl
    - Deletes the `backup_runs` row from the database
 
 **Default retention:** 5 (for manually created jobs), 7 (database default for scheduled jobs).
-**Range:** 1–365 (validated in [`BackupScheduleConfig.Validate()`](internal/modules/backups/domain/backup.go:116)).
+**Range:** 1–365 (validated in `BackupScheduleConfig.Validate()`).
 
 ---
 
@@ -515,7 +515,7 @@ Content-Type: application/json
 
 ### Agent API (Panel → Agent via Unix Socket)
 
-All requests go to the agent's Unix socket. Routed by [`BackupRouter()`](internal/agent/backup_router.go:18).
+All requests go to the agent's Unix socket. Routed by `BackupRouter()`.
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -530,7 +530,7 @@ All requests go to the agent's Unix socket. Routed by [`BackupRouter()`](interna
 
 ## 10. Web UI Guide
 
-The backup interface is at **Websites → {website} → Backups** tab ([`backups.html`](html/template/themes/backend/pages/websites/backups.html:1)).
+The backup interface is at **Websites → {website} → Backups** tab (`backups.html`).
 
 ### Dashboard Cards
 
@@ -571,11 +571,11 @@ The UI automatically polls `GET .../status` every **5 seconds** for any rows wit
 
 ## 11. Concurrency & Locking
 
-Implemented in [`backup_lock.go`](internal/agent/backup_lock.go:1).
+Implemented in `backup_lock.go`.
 
 ### Per-Website Mutex
 
-Each website gets a [`websiteMutex`](internal/agent/backup_lock.go:28) stored in a `sync.Map` keyed by `websiteID`. This prevents concurrent backup and restore operations on the same website.
+Each website gets a `websiteMutex` stored in a `sync.Map` keyed by `websiteID`. This prevents concurrent backup and restore operations on the same website.
 
 The mutex tracks:
 - `held` — whether the lock is currently held
@@ -600,13 +600,13 @@ A separate `lockAcquireMu` mutex serializes the "load or store" operation on the
 
 ### Stale Lock Watchdog
 
-[`startLockWatchdog()`](internal/agent/backup_lock.go:90) runs every **10 minutes** and releases any locks held for more than **2 hours** (assumed stuck/crashed).
+`startLockWatchdog()` runs every **10 minutes** and releases any locks held for more than **2 hours** (assumed stuck/crashed).
 
 ---
 
 ## 12. IO Throttling
 
-Implemented in [`backup_throttle.go`](internal/agent/backup_throttle.go:1).
+Implemented in `backup_throttle.go`.
 
 ### Background Mode (default for scheduled backups)
 
@@ -622,9 +622,9 @@ This ensures backups don't impact website performance.
 
 ### Urgent Mode (manual backups)
 
-Commands run without `ionice`/`nice` wrappers — full system priority. Used when [`TriggerManual`](internal/modules/backups/domain/backup.go:22) is the trigger type.
+Commands run without `ionice`/`nice` wrappers — full system priority. Used when `TriggerManual` is the trigger type.
 
-The mode is set in [`Service.TriggerBackup()`](internal/modules/backups/business/service.go:65):
+The mode is set in `Service.TriggerBackup()`:
 ```go
 if trigger == domain.TriggerManual {
     req.Throttle = domain.ThrottleUrgent
@@ -635,7 +635,7 @@ if trigger == domain.TriggerManual {
 
 ## 13. Disk Space Requirements
 
-Before starting a backup, the agent calculates required space in [`executeBackup()`](internal/agent/backup.go:138):
+Before starting a backup, the agent calculates required space in `executeBackup()`:
 
 ```
 requiredSpace = websiteDirSize × 2.5
@@ -650,7 +650,7 @@ Available space is checked via `syscall.Statfs`. If `available < requiredSpace`,
 
 ### 85% Alert Threshold
 
-After each backup completes, [`checkDiskUsageAlert()`](internal/agent/backup_throttle.go:54) calculates the disk usage percentage. If it exceeds **85%**, a warning is logged:
+After each backup completes, `checkDiskUsageAlert()` calculates the disk usage percentage. If it exceeds **85%**, a warning is logged:
 
 ```
 WARN disk usage above 85%  path=/opt/kiwipanel/backups  used_percent=87.3%
@@ -660,7 +660,7 @@ WARN disk usage above 85%  path=/opt/kiwipanel/backups  used_percent=87.3%
 
 ## 14. MySQL Credential Security
 
-Implemented in [`backup_credentials.go`](internal/agent/backup_credentials.go:1).
+Implemented in `backup_credentials.go`.
 
 ### CNF File Format
 
@@ -748,9 +748,9 @@ Written as `{archiveName}.meta.json` alongside the archive:
 
 Multiple layers of path validation:
 
-1. **Agent backup create** — rejects `website_root` containing `..` ([`backup.go:85`](internal/agent/backup.go:85))
-2. **Agent restore** — rejects `website_root` and `archive_path` containing `..`; additionally requires `archive_path` to start with `backupBaseDir` ([`backup_restore.go:58-73`](internal/agent/backup_restore.go:58))
-3. **Agent delete** — [`validateBackupPath()`](internal/agent/backup_delete.go:14) checks: non-empty, absolute, no `..`, `filepath.Clean()` resolves under `backupBaseDir`
+1. **Agent backup create** — rejects `website_root` containing `..` (`backup.go:85`)
+2. **Agent restore** — rejects `website_root` and `archive_path` containing `..`; additionally requires `archive_path` to start with `backupBaseDir` (`backup_restore.go:58-73`)
+3. **Agent delete** — `validateBackupPath()` checks: non-empty, absolute, no `..`, `filepath.Clean()` resolves under `backupBaseDir`
 4. **Database names** — rejects names containing `..` or `/`
 
 ### HMAC Callbacks (Planned)
@@ -775,10 +775,10 @@ All user-facing API endpoints require a `X-CSRF-Token` header, enforced by the p
 
 | Error | Defined In | When |
 |-------|-----------|------|
-| `ErrBackupJobNotFound` | [`domain/backup.go:135`](internal/modules/backups/domain/backup.go:135) | No job exists for the website |
-| `ErrBackupRunNotFound` | [`domain/backup.go:136`](internal/modules/backups/domain/backup.go:136) | Run ID doesn't exist |
-| `ErrBackupInProgress` | [`domain/backup.go:137`](internal/modules/backups/domain/backup.go:137) | Website already has an active backup |
-| `ErrInsufficientDisk` | [`domain/backup.go:138`](internal/modules/backups/domain/backup.go:138) | Not enough disk space |
+| `ErrBackupJobNotFound` | `domain/backup.go:135` | No job exists for the website |
+| `ErrBackupRunNotFound` | `domain/backup.go:136` | Run ID doesn't exist |
+| `ErrBackupInProgress` | `domain/backup.go:137` | Website already has an active backup |
+| `ErrInsufficientDisk` | `domain/backup.go:138` | Not enough disk space |
 
 ### Agent-Level Errors
 
@@ -861,7 +861,7 @@ pending → cancelled (not yet implemented)
 ### "global backup concurrency limit reached"
 
 **Cause:** Two other backups are already running.
-**Fix:** Wait for them to complete, or increase `globalBackupSem` capacity in [`backup_lock.go:39`](internal/agent/backup_lock.go:39).
+**Fix:** Wait for them to complete, or increase `globalBackupSem` capacity in `backup_lock.go:39`.
 
 ### "insufficient disk space"
 
@@ -903,12 +903,12 @@ The agent code uses several **Linux-only** features:
 
 | Feature | File | Issue on macOS |
 |---------|------|----------------|
-| `ionice` / `nice` | [`backup_throttle.go`](internal/agent/backup_throttle.go:14) | `ionice` doesn't exist on macOS. Background mode commands will fail. |
-| `syscall.Statfs_t` | [`backup_throttle.go`](internal/agent/backup_throttle.go:46) | Works on macOS but field names differ slightly. Currently compiles. |
-| `mysqldump` / `mysql` | [`backup.go`](internal/agent/backup.go:176), [`backup_restore.go`](internal/agent/backup_restore.go:195) | Requires MySQL client binaries installed. |
-| `/opt/kiwipanel/backups/` | [`backup.go:17`](internal/agent/backup.go:17) | Path doesn't exist by default; create it or override. |
-| `/etc/kiwipanel/mysql.cnf` | [`backup_credentials.go:10`](internal/agent/backup_credentials.go:10) | Must be created manually for testing. |
-| Unix socket (agent) | [`route.go`](internal/modules/backups/route.go:18) | Works on macOS. |
+| `ionice` / `nice` | `backup_throttle.go` | `ionice` doesn't exist on macOS. Background mode commands will fail. |
+| `syscall.Statfs_t` | `backup_throttle.go` | Works on macOS but field names differ slightly. Currently compiles. |
+| `mysqldump` / `mysql` | `backup.go`, `backup_restore.go` | Requires MySQL client binaries installed. |
+| `/opt/kiwipanel/backups/` | `backup.go:17` | Path doesn't exist by default; create it or override. |
+| `/etc/kiwipanel/mysql.cnf` | `backup_credentials.go:10` | Must be created manually for testing. |
+| Unix socket (agent) | `route.go` | Works on macOS. |
 
 ### Running Tests
 
@@ -923,7 +923,7 @@ Agent integration tests that invoke `rsync`, `tar`, `mysqldump` require a Linux 
 
 ### Key Interfaces for Mocking
 
-- [`business.Repository`](internal/modules/backups/business/interface.go:10) — mock the database layer
-- [`business.AgentClient`](internal/modules/backups/business/interface.go:38) — mock the agent communication
+- `business.Repository` — mock the database layer
+- `business.AgentClient` — mock the agent communication
 
 Both are interfaces, enabling straightforward test doubles.
