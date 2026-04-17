@@ -54,6 +54,7 @@ export default defineConfig({
           { text: "Logs", link: "/website/log" },
           { text: "Download File", link: "/website/download" },
           { text: "PHP Settings", link: "/website/phpsetting" },
+          { text: "Backup", link: "/website/backup" },
         ],
       },
       {
