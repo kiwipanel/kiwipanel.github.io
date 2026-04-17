@@ -1,29 +1,5 @@
 # Local Backups — Comprehensive Documentation
 
-## Table of Contents
-
-1. [Overview](#1-overview)
-2. [Architecture](#2-architecture)
-3. [Database Schema](#3-database-schema)
-4. [Backup Scopes](#4-backup-scopes)
-5. [Backup Workflow (7 Steps)](#5-backup-workflow-7-steps)
-6. [Restore Workflow](#6-restore-workflow)
-7. [Scheduling](#7-scheduling)
-8. [Retention Policy](#8-retention-policy)
-9. [API Reference](#9-api-reference)
-10. [Web UI Guide](#10-web-ui-guide)
-11. [Concurrency & Locking](#11-concurrency--locking)
-12. [IO Throttling](#12-io-throttling)
-13. [Disk Space Requirements](#13-disk-space-requirements)
-14. [MySQL Credential Security](#14-mysql-credential-security)
-15. [File System Layout](#15-file-system-layout)
-16. [Security Considerations](#16-security-considerations)
-17. [Error Handling](#17-error-handling)
-18. [Caveats & Known Limitations](#18-caveats--known-limitations)
-19. [Tips & Tricks](#19-tips--tricks)
-20. [Troubleshooting](#20-troubleshooting)
-21. [Development Notes](#21-development-notes)
-
 ---
 
 ## 1. Overview

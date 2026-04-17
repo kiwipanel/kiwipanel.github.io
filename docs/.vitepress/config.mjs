@@ -41,6 +41,7 @@ export default defineConfig({
           { text: "Self Healing", link: "/features/selfheal" },
           { text: "Monitor Storage", link: "/features/monitorstorage" },
           { text: "Security Audit", link: "/features/audit" },
+          { text: "Fail2ban", link: "/features/fail2ban" },
           { text: "Global Logs", link: "/features/log" },
           { text: "Update", link: "/features/update" },
         ],
