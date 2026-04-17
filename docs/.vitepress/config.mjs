@@ -40,6 +40,7 @@ export default defineConfig({
           { text: "Health", link: "/features/health" },
           { text: "Self Healing", link: "/features/selfheal" },
           { text: "Monitor Storage", link: "/features/monitorstorage" },
+          { text: "Security Audit", link: "/features/audit" },
           { text: "Global Logs", link: "/features/log" },
           { text: "Update", link: "/features/update" },
         ],
