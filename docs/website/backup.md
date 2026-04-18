@@ -1,7 +1,5 @@
 # Local Backups — Comprehensive Documentation
 
----
-
 ## 1. Overview
 
 The Local Backups feature provides per-website backup and restore capabilities for KiwiPanel. It supports full backups (files + databases), files-only, and database-only backups with automatic scheduling, count-based retention, and an async agent-based execution model.
@@ -32,23 +30,24 @@ The Local Backups feature provides per-website backup and restore capabilities f
 │  (create, list,         (TriggerBackup, TriggerRestore, │
 │   schedule, etc.)        ConfigureSchedule, cleanup)    │
 │                              │                          │
-│  transport/http/             │  SQLite (via storage/)   │
-│  callback.go  ◀──────┐      ▼                          │
-│  (agent callbacks)    │  backup_jobs, backup_runs,      │
-│                       │  backup_providers tables        │
-└───────────────────────┼─────────────────────────────────┘
-                        │ Unix Socket (/v1/backup/*)
-                        │
-┌───────────────────────┼─────────────────────────────────┐
+│  business/service.go         │  SQLite (via storage/)   │
+│  pollAgentStatus() ──────┐   ▼                          │
+│  (polls agent via        │  backup_jobs, backup_runs,   │
+│   Unix socket every 3s)  │  backup_providers tables     │
+└──────────────────────────┼──────────────────────────────┘
+                           │ Unix Socket (/v1/backup/*)
+                           │
+┌──────────────────────────┼──────────────────────────────┐
 │                  Agent Process                           │
 │                                                         │
 │  backup_router.go  ──▶  backup.go (executeBackup)       │
 │    /v1/backup/create    backup_restore.go (executeRestore)│
 │    /v1/backup/restore   backup_scheduler.go             │
-│    /v1/backup/delete    backup_lock.go                  │
-│    /v1/backup/schedule  backup_throttle.go              │
-│                         backup_credentials.go           │
+│    /v1/backup/status    backup_lock.go                  │
+│    /v1/backup/delete    backup_throttle.go              │
+│    /v1/backup/schedule  backup_credentials.go           │
 │                                                         │
+│  In-memory: backupRunStatuses (sync.Map)                │
 │  Disk: /opt/kiwipanel/backups/{websiteID}/              │
 │  Config: /etc/kiwipanel/backup_schedules.json           │
 │  Creds: /etc/kiwipanel/mysql.cnf                        │
@@ -58,11 +57,11 @@ The Local Backups feature provides per-website backup and restore capabilities f
 **Data flow for a manual backup:**
 
 1. User clicks "Create Backup" in the UI
-2. Panel `POST /websites/{id}/backups` → `Service.TriggerBackup()` creates a `backup_run` row (status=`pending`)
+2. Panel `POST /websites/{id}/backups` → handler resolves website details via `WebsiteLookup` → `Service.TriggerBackup()` creates a `backup_run` row (status=`pending`)
 3. Service calls Agent via Unix socket `POST /v1/backup/create`
 4. Agent returns `202 Accepted` immediately, runs `executeBackup()` in a goroutine
-5. Agent reports step progress back to Panel via callback URL (`POST /internal/backups/callback`)
-6. Panel updates the `backup_runs` row with status, path, size, checksum
+5. Agent stores step progress in memory (`backupRunStatuses` sync.Map)
+6. Panel goroutine polls `GET /v1/backup/status?run_id=X` every 3 seconds (up to 4-hour timeout), updating the `backup_runs` row with status, path, size, checksum
 7. Service runs retention cleanup after completion
 
 ---
@@ -448,47 +447,6 @@ Content-Type: application/json
 }
 ```
 
-### Internal Callback API (Agent → Panel)
-
-These are registered under `/internal/backups/` and do **not** require session auth. HMAC-SHA256 signature verification is planned (see TODO in source).
-
-#### Agent Callback
-
-```
-POST /internal/backups/callback
-Content-Type: application/json
-
-{
-  "run_id": 5,
-  "success": true,
-  "status": "completed",
-  "step": "finalize",
-  "archive_path": "/opt/kiwipanel/backups/42/backup_42_20260417_020000.tar.gz",
-  "total_size": 104857600,
-  "file_checksum": "a1b2c3d4e5f6...",
-  "error_message": ""
-}
-```
-
-#### Create Run (Scheduled Backups)
-
-```
-POST /internal/backups/create-run
-Content-Type: application/json
-
-{
-  "website_id": 42,
-  "backup_scope": "full"
-}
-```
-
-**Response** `200 OK`:
-```json
-{
-  "run_id": 7
-}
-```
-
 ### Agent API (Panel → Agent via Unix Socket)
 
 All requests go to the agent's Unix socket. Routed by `BackupRouter()`.
@@ -497,10 +455,13 @@ All requests go to the agent's Unix socket. Routed by `BackupRouter()`.
 |----------|--------|-------------|
 | `/v1/backup/create` | POST | Start a backup |
 | `/v1/backup/restore` | POST | Start a restore |
+| `/v1/backup/status` | GET | Poll backup/restore progress (`?run_id=X`) |
 | `/v1/backup/delete` | POST | Delete a backup archive |
 | `/v1/backup/schedule/set` | POST | Add/update a schedule |
 | `/v1/backup/schedule/delete` | POST | Remove a schedule |
 | `/v1/backup/schedule/get` | GET | Get schedule for a website |
+
+> **Note:** The panel uses Unix socket polling (every 3 seconds) to track backup/restore progress instead of HTTP callbacks. There are no `/internal/backups/` callback endpoints. The agent stores step progress in an in-memory `sync.Map` keyed by run ID, which is cleaned up 30 minutes after completion/failure.
 
 ---
 
@@ -596,16 +557,23 @@ ionice -c2 -n7 nice -n 10 <command>
 
 This ensures backups don't impact website performance.
 
-### Urgent Mode (manual backups)
+### Foreground Mode (manual backups)
 
 Commands run without `ionice`/`nice` wrappers — full system priority. Used when `TriggerManual` is the trigger type.
 
 The mode is set in `Service.TriggerBackup()`:
 ```go
+mode := "background"
 if trigger == domain.TriggerManual {
-    req.Throttle = domain.ThrottleUrgent
+    mode = "foreground"
+}
+req := AgentBackupRequest{
+    // ...
+    Mode: mode,
 }
 ```
+
+The agent's `buildThrottledCommand()` checks the `Mode` field: `"foreground"` skips `ionice`/`nice`, while `"background"` (default) applies throttling.
 
 ---
 
@@ -729,9 +697,9 @@ Multiple layers of path validation:
 3. **Agent delete** — `validateBackupPath()` checks: non-empty, absolute, no `..`, `filepath.Clean()` resolves under `backupBaseDir`
 4. **Database names** — rejects names containing `..` or `/`
 
-### HMAC Callbacks (Planned)
+### Unix Socket Security
 
-The internal callback endpoints (`/internal/backups/callback`, `/internal/backups/create-run`) have TODO comments for HMAC-SHA256 signature verification via `X-Agent-Signature` header. Currently, these endpoints rely on not being exposed externally.
+The agent communicates exclusively via Unix socket, which is protected by filesystem permissions. There are no HTTP callback endpoints exposed — the panel polls the agent for progress via the same Unix socket.
 
 ### CSRF Protection
 
@@ -751,10 +719,10 @@ All user-facing API endpoints require a `X-CSRF-Token` header, enforced by the p
 
 | Error | Defined In | When |
 |-------|-----------|------|
-| `ErrBackupJobNotFound` | `domain/backup.go:135` | No job exists for the website |
-| `ErrBackupRunNotFound` | `domain/backup.go:136` | Run ID doesn't exist |
-| `ErrBackupInProgress` | `domain/backup.go:137` | Website already has an active backup |
-| `ErrInsufficientDisk` | `domain/backup.go:138` | Not enough disk space |
+| `ErrBackupJobNotFound` | `domain/backup.go` | No job exists for the website |
+| `ErrBackupRunNotFound` | `domain/backup.go` | Run ID doesn't exist |
+| `ErrBackupInProgress` | `domain/backup.go` | Website already has an active backup |
+| `ErrInsufficientDisk` | `domain/backup.go` | Not enough disk space |
 
 ### Agent-Level Errors
 
@@ -787,9 +755,9 @@ pending → cancelled (not yet implemented)
 
 2. **No download endpoint** — the UI shows a "Download" button but there's no download handler implemented yet. Archives are only accessible on the server filesystem.
 
-3. **Domain/LinuxUser resolution is TODO** — the HTTP handlers pass empty strings for `domainName` and `linuxUser`. These need to be resolved from the website service.
+3. **~~Domain/LinuxUser resolution is TODO~~** — **Resolved.** The HTTP handler now uses a `WebsiteLookup` interface to resolve `domainName`, `linuxUser`, and `websiteRoot` from the website service before triggering backups. The adapter is wired in `websites/route.go`.
 
-4. **HMAC callback verification not implemented** — internal callback endpoints are not yet authenticated. They must not be exposed to the internet.
+4. **~~HMAC callback verification~~** — **No longer applicable.** Internal callback endpoints have been replaced by Unix socket polling. The panel polls `GET /v1/backup/status` on the agent's Unix socket instead of receiving HTTP callbacks.
 
 5. **No encryption at rest** — backup archives are stored as plain tar.gz files.
 
@@ -882,8 +850,8 @@ The agent code uses several **Linux-only** features:
 | `ionice` / `nice` | `backup_throttle.go` | `ionice` doesn't exist on macOS. Background mode commands will fail. |
 | `syscall.Statfs_t` | `backup_throttle.go` | Works on macOS but field names differ slightly. Currently compiles. |
 | `mysqldump` / `mysql` | `backup.go`, `backup_restore.go` | Requires MySQL client binaries installed. |
-| `/opt/kiwipanel/backups/` | `backup.go:17` | Path doesn't exist by default; create it or override. |
-| `/etc/kiwipanel/mysql.cnf` | `backup_credentials.go:10` | Must be created manually for testing. |
+| `/opt/kiwipanel/backups/` | `backup.go` | Path doesn't exist by default; create it or override. |
+| `/etc/kiwipanel/mysql.cnf` | `backup_credentials.go` | Must be created manually for testing. |
 | Unix socket (agent) | `route.go` | Works on macOS. |
 
 ### Running Tests
@@ -901,5 +869,33 @@ Agent integration tests that invoke `rsync`, `tar`, `mysqldump` require a Linux 
 
 - `business.Repository` — mock the database layer
 - `business.AgentClient` — mock the agent communication
+- `business.BackupEventLogger` — mock event logging (optional dependency)
+- `transport/http.WebsiteLookup` — mock website detail resolution
+- `transport/http.WebsiteAuthorizer` — mock per-website access control
+- `transport/http.EventLogger` — mock handler-level event logging
 
-Both are interfaces, enabling straightforward test doubles.
+All are interfaces, enabling straightforward test doubles.
+
+### Event Logging Integration
+
+The backup module integrates with the events system via two adapter interfaces:
+
+- **`BackupEventLogger`** (service-level) — logs events from background goroutines with `system` actor type. Set via `Service.SetEventLogger()`.
+- **`EventLogger`** (handler-level) — logs events from HTTP handlers with the authenticated user's actor context. Set via `Handler.SetEventService()`.
+
+Both are wired in `websites/route.go` using the `backupEventAdapter` which bridges to `events/business.EventService`.
+
+### Website Authorization
+
+The backup handler supports per-website access control via the `WebsiteAuthorizer` interface. When set (via `Handler.SetAuthorizer()`), it checks that the authenticated user owns the website before allowing backup operations. Admins can access all websites. This is wired in `websites/route.go` using `websiteAuthzAdapter`.
+
+### Polling Architecture
+
+The panel-to-agent communication uses a polling model instead of HTTP callbacks:
+
+1. Panel calls agent via Unix socket (e.g., `POST /v1/backup/create`)
+2. Agent returns `202 Accepted` immediately
+3. Agent stores step progress in `backupRunStatuses` (`sync.Map`)
+4. Panel goroutine calls `pollAgentStatus()` which polls `GET /v1/backup/status?run_id=X` every **3 seconds**
+5. Poll timeout is **4 hours** (matches agent's context timeout)
+6. Agent cleans up completed/failed statuses after **30 minutes**
