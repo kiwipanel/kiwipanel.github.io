@@ -35,11 +35,12 @@ The **PHP / LSPHP** tab shows PHP-level system errors that aren't visible throug
 
 #### Log Sources
 
-The tab reads from two types of log files:
+The tab reads from three types of log files:
 
 | Source | Path | What it captures |
 |--------|------|-----------------|
 | Shared stderr | `/usr/local/lsws/logs/stderr.log` | OPcache errors, LSPHP startup failures — shared across all PHP versions |
+| Global PHP error log | `/var/log/lsws/php_error.log` | Runtime PHP errors from all versions (set via `error_log` in `00-kiwipanel.ini`) |
 | Per-version error log | `/usr/local/lsws/lsphpXX/logs/error.log` | Version-specific PHP errors (e.g., `lsphp84/logs/error.log` for PHP 8.4) |
 
 #### Version Filtering
@@ -146,9 +147,22 @@ Each website gets its own logrotate configuration, created automatically during 
 
 When a website is deleted, its logrotate configuration is removed automatically.
 
-### PHP / LSPHP Log Sources
+### OLS & PHP Log Rotation
 
-PHP / LSPHP logs are not rotated by KiwiPanel since they are managed by OpenLiteSpeed. The shared `stderr.log` is truncated by LSWS when it restarts. Per-version error logs grow over time and can be cleared manually if needed.
+KiwiPanel automatically creates `/etc/logrotate.d/kiwi_ols` on agent startup to rotate OpenLiteSpeed and PHP system logs:
+
+| Log File | Rotation | Retention |
+|----------|----------|-----------|
+| `/usr/local/lsws/logs/error.log` | Daily or when > 50 MB | 30 days |
+| `/usr/local/lsws/logs/stderr.log` | Daily or when > 50 MB | 30 days |
+| `/usr/local/lsws/logs/access.log` | Daily or when > 50 MB | 30 days |
+| `/var/log/lsws/php_error.log` | Daily or when > 50 MB | 30 days |
+
+This uses `copytruncate` so OLS and PHP keep writing to the same file descriptors without requiring a restart. Without this rotation, OLS truncates `error.log` on every restart, destroying crash evidence needed for post-mortem analysis.
+
+::: tip
+The logrotate config is only written if `/etc/logrotate.d/kiwi_ols` doesn't already exist. If you need custom rotation settings, edit the file directly — it won't be overwritten.
+:::
 
 ### System Log Rotation
 
@@ -164,7 +178,7 @@ A cleanup cron job runs daily at 3 AM to archive old terminal session logs and d
 
 ### Per-Website PHP Error Logging
 
-KiwiPanel automatically configures each website to write PHP errors to its own `php_error.log` file. This is handled transparently — you don't need to configure anything.
+KiwiPanel automatically configures each website to write PHP errors to its own `php_error.log` file via the vhost configuration. Additionally, a global fallback `error_log` is set via `00-kiwipanel.ini` (auto-created on agent startup) so that PHP errors are always captured even outside website contexts.
 
 The following types of PHP errors are captured:
 
@@ -185,9 +199,12 @@ The **Watchdog** page (`Dashboard → Watchdog`) monitors LSPHP processes and di
 
 ### How It Works
 
-- The watchdog agent checks for running LSPHP processes using `pgrep -f lsphpXX`
-- If a process is not found, the service is marked as `ols-stopped`
-- A red alert banner appears at the top of the Watchdog page listing the stopped PHP versions
+- The watchdog agent checks for running LSPHP processes by scanning `/proc/*/exe` symlinks for versioned binaries (e.g., `/usr/local/lsws/lsphp84/bin/lsphp`)
+- If a process is not found but the binary exists, the service is marked as `ols-idle` (healthy — OLS spawns on demand)
+- If the binary doesn't exist, the service is marked as `ols-stopped`
+- If recent fatal errors are found in `stderr.log`, the service is marked as `ols-degraded`
+- Auto-heal kills stuck workers and reloads OLS for `ols-stopped` and `ols-degraded` states
+- A red alert banner appears at the top of the Watchdog page listing affected PHP versions
 - The banner includes a link to **System Logs → PHP / LSPHP** for error investigation
 
 ### Common Causes
