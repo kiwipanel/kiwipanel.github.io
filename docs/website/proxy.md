@@ -5,9 +5,9 @@ description: Create and manage reverse-proxy websites in KiwiPanel
 
 # Proxy Sites
 
-A **proxy site** is a whole-site reverse proxy served by OpenLiteSpeed / LiteSpeed Web Server (LSWS). Every request that hits the virtual host is forwarded to a backend application — there is no PHP runtime, no document-root file serving, and no per-path routing. If you need to proxy only a sub-path on a PHP site, see [Reverse Proxy Rules](./reverse-proxy-rules.md) instead.
+A **proxy site** is a whole-site reverse proxy served by OpenLiteSpeed / LiteSpeed Web Server (LSWS). Every request that hits the virtual host is forwarded to a backend application — there is no PHP runtime, no document-root file serving, and no per-path routing. If you need to proxy only a sub-path on a PHP site.
 
-KiwiPanel supports three site types — **php**, **proxy**, and **static**. This page covers the **proxy** type exclusively. For a comparison of all three, see [Site Types](./site-types.md).
+KiwiPanel supports three site types — **php**, **proxy**, and **static**. This page covers the **proxy** type exclusively. 
 
 ::: info Source paths are not links
 Source-code paths referenced throughout this page (templates, handlers, schema, etc.) are shown as plain text rather than clickable links because they live outside the `docs/` root and VitePress cannot resolve those paths at build time. Browse them directly in the repository.
@@ -40,8 +40,7 @@ Unlike the strict SSRF check used for per-path [Reverse Proxy Rules](./reverse-p
 | **Custom Request Headers** | Optional. One `Key: Value` per line. Injected into every proxied request. |
 
 ::: info
-The **path** is locked to `/` — you cannot proxy only a sub-path from this form. Per-path proxying is a separate feature available on PHP sites via [Reverse Proxy Rules](./reverse-proxy-rules.md).
-:::
+The **path** is locked to `/` — you cannot proxy only a sub-path from this form. Per-path proxying is a separate feature available on PHP sites.
 
 4. Click **Create**. KiwiPanel writes a row to `website_proxy_config`, renders the LSWS vhconf from `kiwipanel/templates/lsws/vhconf_proxy.tmpl`, and gracefully reloads LSWS.
 
@@ -59,7 +58,7 @@ Saving regenerates the LSWS vhconf and triggers an automatic graceful reload. Th
 ## Validation rules
 
 - **Backend URL** must be a valid `http` or `https` URL with a non-empty host.
-- **Path** is always `/` (whole-site proxy). Per-path proxying is a separate feature — see [Reverse Proxy Rules](./reverse-proxy-rules.md), available only on PHP sites.
+- **Path** is always `/` (whole-site proxy). 
 - **Hostname resolution** uses `internal/modules/websites/domain/ssrf.go:196` (`ResolveBackendForLocalProxy`) — public IPs and loopback (`127.0.0.0/8`, `::1`) are allowed; link-local, multicast, and broadcast are rejected. The resolved IP is persisted and re-verified at apply time as a DNS-rebinding mitigation.
 - **Header names** must match the RFC 7230 token grammar (alphanumerics plus ``! # $ % & ' * + - . ^ _ ` | ~``). No spaces or colons in the name portion.
 - **Reserved headers** are rejected: `Host`, `X-Forwarded-Host`, `X-Forwarded-Proto`, `X-Forwarded-For`, `Connection`, `Content-Length`, `Transfer-Encoding`. See `internal/modules/websites/domain/proxy_config.go:32` (`reservedProxyHeaderNames`).
