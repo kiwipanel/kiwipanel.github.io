@@ -23,7 +23,7 @@ Use a proxy site when your application handles its own HTTP and you just need LS
 - A backend microservice on a private RFC 1918 address like `10.0.0.5:8080`
 
 ::: tip Loopback is allowed
-Unlike the strict SSRF check used for per-path [Reverse Proxy Rules](./reverse-proxy-rules.md), whole-site proxy backends use `internal/modules/websites/domain/ssrf.go:196` (`ResolveBackendForLocalProxy`) which **allows** loopback (`127.0.0.0/8`, `::1`) and RFC 1918 addresses. Only link-local (`169.254.x.x` — cloud metadata!), multicast, and broadcast ranges are rejected.
+Unlike the strict SSRF check used for per-path, whole-site proxy backends use `internal/modules/websites/domain/ssrf.go:196` (`ResolveBackendForLocalProxy`) which **allows** loopback (`127.0.0.0/8`, `::1`) and RFC 1918 addresses. Only link-local (`169.254.x.x` — cloud metadata!), multicast, and broadcast ranges are rejected.
 :::
 
 ## Creating a Proxy Site
