@@ -9,7 +9,20 @@
 
 ## Default locations
 Here are the folders on your VPS that Kiwipanel uses:
-- `/usr/local/bin/kiwipanel`: This is the "root" binary (written in bash) file of Kiwipanel. It is used to start and stop the Kiwipanel service. Sometimes you might use this binary to fix the permissions of the Kiwipanel binary file (written in Golang), if any. Normally everything is fine.
+- `/usr/local/bin/kiwipanel`: This is the "root" binary (written in bash) file of Kiwipanel. Actually it is a wrapper only. You can find the source code of the wrapper at [kiwipanel/scripts/wrapper](https://github.com/kiwipanel/install/releases), inside the folder kiwipanel-scaffold.zip. This bash script is used to start and stop the Kiwipanel service web and kiwipane-agent. Sometimes you might use this binary to fix the permissions of the Kiwipanel binary file (written in Golang), if any. Normally everything is fine. Below is a portion of `kiwipanel` bash script.
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+REAL_BIN="/opt/kiwipanel/bin/kiwipanel"
+BASE_DIR="/opt/kiwipanel"
+
+# Executes the KiwiPanel binary with the provided arguments
+exec "$REAL_BIN" "$@"
+
+```
+
 - `/opt/kiwipanel`: This is the core directory where Kiwipanel is installed. `/opt/kiwipanel/{bin, config, data, logs, meta, scripts, ssl, templates}`: The binary file, the config file, the logs... of Kiwipanel are all located here.
 - `/opt/kiwipanel/ssl/panel`: Contains the SSL certificate files. After installing you will get two files: kiwipanel.key and kiwipanel.crt. These files are used to secure the panel and this is self-signed certificate (IP:8443).
 - `/home/kiwiweb/default_site/index.html`: This is the default index file when you visit the IP address of your VPS.

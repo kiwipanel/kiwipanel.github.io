@@ -47,5 +47,5 @@ features:
 ---
 ####
 <center>
-     <small>Last update: 02 Apr 2026. By Vuong and contributors.</small>
+     <small>Last update: 28 Aug 2026. By Vuong and contributors.</small>
 </center>
