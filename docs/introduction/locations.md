@@ -97,9 +97,22 @@ index {
 
 Now you might realize that the `vhRoot` is the root directory of the virtual host, and the `configFile` is the configuration file for the virtual host. We have successfully changed the default port to 80 and mapped it to Kiwipanel and the html directory is located at `/home/kiwiweb/default_site/`.
 
-Location of updated panel `/var/lib/kiwipanel/update`
+- Location of updated panel, the binary files for web-based terminal `/var/lib/kiwipanel`
 
+```bash
+root@kiwipanel:/var/lib/kiwipanel# ls
+install.d  terminal-bin  update  uploads  watchdog
+root@kiwipanel:/var/lib/kiwipanel#
 
-Mariadb: Installing log: `/var/log/kiwipanel-install.log`
+root@kiwipanel:~# cat /var/lib/kiwipanel/update/status.json
+{
+  "state": "available",
+  "message": "Update available: 0.8.5",
+  "time": "2026-08-27T08:00:33Z"
+}
 
-Mariadb error log: `/var/log/mysql/error.log`
+```
+
+- Mariadb: Installing log: `/var/log/kiwipanel-install.log`
+
+- Mariadb error log: `/var/log/mysql/error.log`
