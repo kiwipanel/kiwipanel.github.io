@@ -59,6 +59,7 @@ export default defineConfig({
           { text: "Reverse Proxy", link: "/website/proxy" },
           { text: "PHP Settings", link: "/website/phpsetting" },
           { text: "Backup", link: "/website/backup" },
+          { text: "Upload", link: "/website/upload" },
         ],
       },
       {
