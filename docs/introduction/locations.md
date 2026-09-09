@@ -97,6 +97,8 @@ index {
 
 Now you might realize that the `vhRoot` is the root directory of the virtual host, and the `configFile` is the configuration file for the virtual host. We have successfully changed the default port to 80 and mapped it to Kiwipanel and the html directory is located at `/home/kiwiweb/default_site/`.
 
+- `/etc/kiwipanel/secrets.env` is the environment file for the Kiwipanel secrets.
+
 - Location of updated panel, the binary files for web-based terminal `/var/lib/kiwipanel`
 
 ```bash
