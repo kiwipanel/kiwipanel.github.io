@@ -75,6 +75,11 @@ export default defineConfig({
             text: "Standards",
             link: "/advanced/kiwi_panel_coding_standards.md",
           },
+
+          {
+            text: "Verify",
+            link: "/advanced/verify.md",
+          },
         ],
       },
       {
