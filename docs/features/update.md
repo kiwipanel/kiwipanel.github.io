@@ -52,9 +52,19 @@ kiwipanel panel update
 This non-mutating command checks GitHub for the latest compatible release,
 compares it with the binary's current version using semver, and reports whether
 an update is available. Review and apply an available release from
-**Dashboard → System → Update**. The internal `kiwipanel panel update apply`
-subcommand applies an already staged release as root and is intended for the
-systemd update service, not normal operator use.
+**Dashboard → System → Update**.
+
+::: danger Do not run `kiwipanel panel update apply` manually
+`kiwipanel panel update apply` is an internal, root-only systemd action. It
+**does not check for, download, or stage** an update; it only attempts to apply
+an update that the dashboard has already downloaded and checksum-verified.
+
+The `kiwipanel-update.service` unit runs it automatically after staging. Do not
+use it as a normal operator CLI command, including as a substitute for the
+Dashboard → System → Update flow. A manual invocation can interrupt the panel
+and bypass the dashboard's progress/status experience; if no valid staged
+release is present, it fails safely without updating anything.
+:::
 
 ## Installer and Updater Lifecycle Boundary
 
@@ -364,4 +374,4 @@ Update events are logged to `/var/log/kiwipanel/update.log`. You can also view t
 | Command | Description |
 |---------|-------------|
 | `kiwipanel panel update` | Non-mutating check for an available compatible update; apply through Dashboard → System → Update |
-| `kiwipanel panel update apply` | Internal systemd action that applies an already staged update as root |
+| `kiwipanel panel update apply` | **Do not run manually.** Internal root-only systemd action that applies an already verified, staged update |
