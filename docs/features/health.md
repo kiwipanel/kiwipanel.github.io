@@ -582,15 +582,6 @@ The health API is rate-limited to prevent abuse:
 
 ---
 
-## Related Documentation
-
-- **Update System:** [`docs/update.md`](update.md) — Self-update mechanism and trusted staging
-- **Security Architecture:** [`CLAUDE.md`](../CLAUDE.md) — Privilege separation design
-- **Agent Protocol:** [`pkg/agentcontract/`](../pkg/agentcontract/) — Unix socket IPC contract
-- **Security Proposal:** [`ideas/staging_security_proposal.md`](../ideas/staging_security_proposal.md) — Trust boundary implementation details
-
----
-
 ## Change History
 
 | Version | Date | Changes |
