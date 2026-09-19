@@ -30,13 +30,13 @@ https://YOUR_PANEL_DOMAIN:8443/dashboard/health
 
 ```bash
 # Full health report
-kiwipanel health
+kiwipanel check
 
-# Check specific category
-kiwipanel health --category security
+# JSON output for scripting
+kiwipanel check --json
 
 # Auto-fix mode (repairs common issues)
-kiwipanel health --fix
+kiwipanel check --fix
 ```
 
 ### API Endpoints
@@ -219,7 +219,7 @@ The health system includes remediation for common configuration issues:
 
 **Via CLI:**
 ```bash
-kiwipanel health --fix
+kiwipanel check --fix
 ```
 
 **Via API:**
@@ -479,7 +479,7 @@ If service checks report failures:
 
 3. **Attempt auto-fix:**
    ```bash
-   kiwipanel health --fix
+   kiwipanel check --fix
    ```
 
 **High Disk Usage**
