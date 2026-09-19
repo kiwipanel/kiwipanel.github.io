@@ -526,38 +526,6 @@ The dashboard automatically refreshes every 60 seconds. Manual refresh is instan
 
 ---
 
-## Development
-
-### Adding Custom Checks
-
-Custom checks can be added to [`pkg/health/check.go`](../pkg/health/check.go):
-
-```go
-func CheckCustomFeature() (bool, string) {
-    // Your validation logic
-    if everythingOK {
-        return true, "feature operational"
-    }
-    return false, "feature degraded"
-}
-
-// Register in GetAllChecks() and RunAllChecks()
-```
-
-### Testing
-
-Run health checks in test mode:
-
-```bash
-go test ./pkg/health/... -v
-```
-
-### Agent Integration
-
-Checks requiring root privileges should be added to [`internal/agent/security_boundary.go`](../internal/agent/security_boundary.go) and exposed via the agent's Unix socket API.
-
----
-
 ## Security Considerations
 
 ### Information Disclosure
