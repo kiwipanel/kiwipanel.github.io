@@ -139,6 +139,32 @@ Every update is protected by multiple checks:
 
 Preparation and apply use the root-owned advisory lock at `/run/kiwipanel/update.lock`. Never delete the lock file to unlock an update. Advisory locks are released by the operating system when the owning process exits; deleting the path can create a second inode and defeat mutual exclusion.
 
+## Release verification badge
+
+The system health dashboard (`/dashboard/health`) includes a **Release Verification** badge showing whether the currently running KiwiPanel binary was installed from a cryptographically verified signed update.
+
+### What the badge proves
+
+The badge displays historical provenance: it confirms that a specific past update was applied from a signature-verified manifest and that the running binary matches the recorded installation. It does **not** re-verify the release signature on every dashboard request; the exact signed manifest envelope is not retained after apply.
+
+### Badge states
+
+| State | Badge | Meaning |
+|-------|-------|---------|
+| **Release Signature Verified** | Green | The running release was installed from a signature-verified manifest. Key ID and installation timestamp are shown inline. |
+| **Provenance Unavailable** | Gray | No signed-update provenance is recorded yet. Fresh installs, legacy installs, and manually installed systems show this state until a verified update is applied. |
+| **Running Build Not Verified** | Red | The running binary does not match the recorded verified release (manual replacement or rollback). |
+| **Provenance Record Invalid** | Red | The recorded provenance is malformed or failed integrity checks. Inspect `/var/lib/kiwipanel/update/release-provenance.json`. |
+| **Status Unknown** | Gray | Verification status could not be determined. Check panel logs for details. |
+
+### Key ID semantics
+
+The signing key ID (e.g., `release-2026`) is a public audit hint identifying which trusted key authenticated the manifest. It does not contain secret material and is visible to all admin users.
+
+### Rollout nuance
+
+Existing and fresh installs show `Provenance Unavailable` until the first signed update is applied **after** the verification feature was introduced. The release that introduces the feature cannot record its own provenance because the writer code is not yet running. Provenance recording begins with the next update.
+
 ## Automatic rollback and recovery
 
 Recovery depends on the phase that failed:
@@ -194,6 +220,7 @@ sudo systemctl enable --now kiwipanel-update.path
 ```text
 /var/lib/kiwipanel/update/
 ├── status.json                 # Root-authored status read by the dashboard
+├── release-provenance.json     # Root-authored signed-release provenance (0640, group kiwisecure)
 └── trusted/
     ├── ready                   # Root-owned marker watched by systemd
     └── stages/                 # Root-private staged release data
@@ -261,6 +288,28 @@ sudo journalctl -u kiwipanel-agent.service -n 100 --no-pager
 ```
 
 Do not delete `/run/kiwipanel/update.lock`. Confirm that no preparation or apply process remains and that service recovery completed before retrying.
+
+### The verification badge shows "Running Build Not Verified"
+
+The running binary does not match the recorded verified release. This occurs after:
+
+- Manual binary replacement (e.g., copying a different build to `/opt/kiwipanel/bin/kiwipanel`)
+- Manual rollback to a previous version without using the updater's recovery mechanism
+
+If the replacement was intentional, the badge state is correct. To restore verification, apply a signed update through the normal dashboard workflow.
+
+### The verification badge shows "Provenance Record Invalid"
+
+The release provenance record at `/var/lib/kiwipanel/update/release-provenance.json` is malformed, has incorrect ownership or permissions, or failed integrity checks. This file is root-owned and should only be written by the updater.
+
+Inspect the file:
+
+```bash
+sudo ls -la /var/lib/kiwipanel/update/release-provenance.json
+sudo cat /var/lib/kiwipanel/update/release-provenance.json
+```
+
+To repair, apply a signed update through the dashboard. Manual editing is not supported; the updater will overwrite the file during the next successful update.
 
 ### The release has no compatible binary
 
