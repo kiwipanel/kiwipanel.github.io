@@ -45,6 +45,7 @@ export default defineConfig({
           { text: "Fail2ban", link: "/features/fail2ban" },
           { text: "Global Logs", link: "/features/log" },
           { text: "Update", link: "/features/update" },
+          { text: "Update PHP", link: "/features/update-php" },
           { text: "Reset Password", link: "/features/resetpassword.md" },
         ],
       },
