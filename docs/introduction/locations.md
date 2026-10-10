@@ -215,7 +215,7 @@ root@kiwipanel:~# cat /var/lib/kiwipanel/update/status.json
 }
 ```
 
-The `state` field moves through the update lifecycle: `idle`, `checking`, `available`, `downloading`, `ready`, `installing`, `validating`, `verifying`, and `error`. Later entries may also carry `attempt_id` and a `security` object with `preflight`, `candidate`, `rollback`, and `final` checkpoints. See [Updating KiwiPanel](./vitepress_update) for the full lifecycle.
+The `state` field moves through the update lifecycle: `idle`, `checking`, `available`, `downloading`, `ready`, `installing`, `validating`, `verifying`, and `error`. Later entries may also carry `attempt_id` and a `security` object with `preflight`, `candidate`, `rollback`, and `final` checkpoints. 
 
 ### Logs
 
@@ -226,7 +226,6 @@ The `state` field moves through the update lifecycle: `idle`, `checking`, `avail
 
 ## See also
 
-- [Updating KiwiPanel](./vitepress_update) — update lifecycle, staging layout, and provenance
-- [Backups](./backup) — website backup layout under `/opt/kiwipanel/backups`
-- [Diagnostics](./diagnostics) — permission and integrity checks for these directories
-- [Website Terminal](./terminal) — how `terminal-bin/` forms the restricted `PATH`
+- [Updating KiwiPanel](/features/update.md) — update lifecycle, staging layout, and provenance
+- [Diagnostics](/features/security.md) — permission and integrity checks for these directories
+- [Website Terminal](/website/terminal.md) — how `terminal-bin/` forms the restricted `PATH`
